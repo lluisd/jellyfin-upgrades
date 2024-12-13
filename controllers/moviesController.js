@@ -46,12 +46,14 @@ class MoviesController {
                     deleted = storageService.removeFileOrFolder(name, extension)
                 }
 
-                await notificationService.notify(mediaMovie, dataMovie, oldDate, deleted, reason)
+                await notificationService.notifyUpgradedMovie(mediaMovie, dataMovie, oldDate, deleted, reason)
 
                 response = `Movie upgraded: ${mediaMovie.Name} (tmdb: ${tmdb}, imdb: ${imdb})`
                 console.log(response)
             } else if (mediaMovie && !dataMovie) {
                 await dataService.addMovie(mediaService.createMovie(mediaMovie))
+
+                await notificationService.notifyAddedMovie(mediaMovie, tmdb)
                 response = `Movie created: ${mediaMovie.Name} (tmdb: ${tmdb}, imdb: ${imdb})`
                 console.log(response)
             }

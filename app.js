@@ -17,6 +17,10 @@ mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
 
     app.use(express.json())
 
+    app.get('/health', function(req, res) {
+        res.json({ status: 'UP' })
+    })
+
     app.get('/refresh', async function(req, res, next) {
         try {
             const movies = await moviesController.refreshMovies()
