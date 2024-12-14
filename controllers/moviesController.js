@@ -39,14 +39,15 @@ class MoviesController {
                 const oldDate = mediaMovie.DateCreated
                 await mediaService.updateDateCreated(mediaMovie, dataMovie.dateCreated)
 
-                await dataService.updatePath(tmdb, imdb, mediaMovie.Path)
+                const newSize = mediaMovie?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
+                await dataService.updatePathAndSize(tmdb, imdb, mediaMovie.Path, newSize)
                 const {name, extension} = getFilenameAndExtension(dataMovie)
-                let {deleted, reason, exists} = await torrentService.deleteFromTorrentClient(name, extension)
-                if (!deleted && !exists) {
+                let {deleted, reason, torrentExists} = await torrentService.deleteFromTorrentClient(name, extension)
+                if (!torrentExists) {
                     deleted = storageService.removeFileOrFolder(name, extension)
                 }
 
-                await notificationService.notifyUpgradedMovie(mediaMovie, dataMovie, oldDate, deleted, reason)
+                await notificationService.notifyUpgradedMovie(mediaMovie, dataMovie, oldDate, newSize, deleted, reason, torrentExists)
 
                 response = `Movie upgraded: ${mediaMovie.Name} (tmdb: ${tmdb}, imdb: ${imdb})`
                 console.log(response)

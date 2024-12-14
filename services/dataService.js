@@ -33,9 +33,9 @@ class DataService {
         }
     }
 
-    async updatePath(tmdb, imdb, path) {
+    async updatePathAndSize(tmdb, imdb, path, size) {
         try {
-            return await Mongo.updateMovie(tmdb, imdb, {path: path})
+            return await Mongo.updateMovie(tmdb, imdb, {path: path, size: size})
         } catch (error) {
             throw error
         }

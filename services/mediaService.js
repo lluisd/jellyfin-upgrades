@@ -41,10 +41,10 @@ class MediaService {
             dateCreated: movie.DateCreated,
             tmdb: movie?.ProviderIds?.Tmdb ?? '',
             imdb: movie?.ProviderIds?.Imdb ?? '',
-            path: movie.Path
+            path: movie.Path,
+            size: movie?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
         }
     }
 }
-
 const moviesService = new MediaService()
 export default moviesService

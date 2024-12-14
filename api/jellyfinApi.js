@@ -24,7 +24,7 @@ async function getMovies(hasLimit = false) {
         const options = {
             isMovie: true,
             parentId: config.jellyfin.libraryId,
-            fields: [ItemFields.DateCreated, ItemFields.OriginalTitle, ItemFields.ProviderIds, ItemFields.Path],
+            fields: [ItemFields.DateCreated, ItemFields.OriginalTitle, ItemFields.ProviderIds, ItemFields.Path, ItemFields.MediaSources],
             sortBy: [ItemSortBy.DateCreated],
             sortOrder: SortOrder.Descending,
             hasTmdbId: true

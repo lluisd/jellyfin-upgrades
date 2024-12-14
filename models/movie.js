@@ -23,6 +23,10 @@ const MovieSchema = new Schema({
         type: String,
         required: false
     },
+    size: {
+        type: Number,
+        required: false
+    },
     lastModified: {
         type: Date,
         default: Date.now
