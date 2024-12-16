@@ -1,9 +1,9 @@
 import path from 'path'
 
-export function getFilenameAndExtension (movie) {
-    const fileNameWithExt = path.basename(movie.path)
+export function getFilenameAndExtension (completePath) {
+    const fileNameWithExt = path.basename(completePath)
     const fileNameWithoutExt = path.parse(fileNameWithExt).name
-    const fileExtension = path.extname(movie.path)
+    const fileExtension = path.extname(completePath)
 
     return {
         name: fileNameWithoutExt,

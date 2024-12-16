@@ -2,7 +2,9 @@ import 'dotenv/config'
 import mongoose from 'mongoose'
 import { config } from './config.js'
 import express from "express"
-import moviesController from "./controllers/moviesController.js";
+import moviesController from "./controllers/moviesController.js"
+import filesController from "./controllers/filesController.js"
+import cron from 'node-cron'
 
 mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
     console.log('Connected')
@@ -16,6 +18,18 @@ mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
     })
 
     app.use(express.json())
+
+    app.get('/torrents', async function(req, res, next) {
+        try {
+            const movies = await filesController.removeTorrents()
+            const response = {
+                message: movies,
+                status: 'success'
+            };
+            res.json(response)
+        } catch (error) {
+        }
+    })
 
     app.get('/health', function(req, res) {
         res.json({ status: 'UP' })
@@ -38,7 +52,7 @@ mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
         try {
             const data = req.body
             console.log('Received webhook:', data)
-            const result = await moviesController.upgradeMovie(data.id, data.tmdb, data.imdb)
+            const result = await moviesController.updateMovie(data.id, data.tmdb, data.imdb)
             const response = {
                 message: result,
                 status: 'success'
@@ -51,6 +65,10 @@ mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
 
     const listener = app.listen(process.env.PORT, async ()=>  {
         console.log('Listening on port ', + listener.address().port)
+    })
+
+    cron.schedule('0 4 * * *', async () => {
+        await moviesController.refreshMovies()
     })
 })
 

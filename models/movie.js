@@ -3,6 +3,10 @@ const Schema = mongoose.Schema
 
 /* Movie Schema */
 const MovieSchema = new Schema({
+    jellyfinId: {
+        type: String,
+        required: true
+    },
     name: {
         type: String,
         required: true

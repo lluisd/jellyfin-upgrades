@@ -7,7 +7,7 @@ async function notify(text) {
     try {
         await bot.sendMessage(config.telegram.channelId, text, { parse_mode: 'Markdown' })
     } catch (e) {
-        throw new Error('Error sending telegram message ' + e, e)
+        throw new Error('Error sending telegram message ' + e)
     }
 }
 

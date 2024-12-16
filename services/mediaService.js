@@ -35,8 +35,10 @@ class MediaService {
             throw error
         }
     }
+
     createMovie (movie) {
         return {
+            jellyfinId: movie.Id,
             name: movie.Name,
             dateCreated: movie.DateCreated,
             tmdb: movie?.ProviderIds?.Tmdb ?? '',

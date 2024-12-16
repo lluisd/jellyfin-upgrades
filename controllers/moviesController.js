@@ -3,10 +3,12 @@ import torrentService from "../services/torrentService.js"
 import mediaService from "../services/mediaService.js"
 import dataService from "../services/dataService.js"
 import notificationService from "../services/notificationService.js"
-import { getFilenameAndExtension } from '../utils/files.js'
+import {getFilenameAndExtension} from '../utils/files.js'
+import semaphore from "../semaphore.js"
 
 class MoviesController {
     async refreshMovies () {
+        const [ value, release ] = await semaphore.acquire()
         try {
             console.log('Refreshing movies')
 
@@ -24,24 +26,28 @@ class MoviesController {
             return movies
         } catch (error) {
             throw error
+        } finally {
+            release()
         }
     }
 
-    async upgradeMovie (id, tmdb, imdb) {
+    async updateMovie (id, tmdb, imdb) {
+        const [ value, release ] = await semaphore.acquire()
         try {
             let response = 'nothing'
             console.log(`upgrading movie: ${id} (tmdb: ${tmdb}, imdb: ${imdb})`)
 
             const dataMovie = await dataService.getMovie(tmdb, imdb)
             const mediaMovie = await mediaService.getMovie(id)
+            const isSameMovie = mediaMovie?.Id === dataMovie?.jellyfinId
 
-            if (mediaMovie && dataMovie) {
+            if (mediaMovie && dataMovie && !isSameMovie) {
                 const oldDate = mediaMovie.DateCreated
                 await mediaService.updateDateCreated(mediaMovie, dataMovie.dateCreated)
 
                 const newSize = mediaMovie?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
                 await dataService.updatePathAndSize(tmdb, imdb, mediaMovie.Path, newSize)
-                const {name, extension} = getFilenameAndExtension(dataMovie)
+                const {name, extension} = getFilenameAndExtension(dataMovie.path)
                 let {deleted, reason, torrentExists} = await torrentService.deleteFromTorrentClient(name, extension)
                 if (!torrentExists) {
                     deleted = storageService.removeFileOrFolder(name, extension)
@@ -61,6 +67,8 @@ class MoviesController {
             return response
         } catch (error) {
             throw error
+        }  finally {
+            release()
         }
     }
 }
