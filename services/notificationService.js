@@ -59,7 +59,7 @@ class NotificationService {
     }
 
     _mapIntent(intent, index) {
-        return `*${index + 1}.* \`${intent.filename}\` ${intent.deleted ? '✔️' : '❌ '}${intent.deleted && intent.torrentExists ? '✔️' : ''}${!intent.deleted && intent.torrentExists ? this._mapReason(intent) : ''}`
+        return `*${index + 1}.* \`${intent.filename}\` ${intent.deleted ? '✔️' : '❌ '}${intent.deleted && intent.torrentExists ? '✔️' : ''}${!intent.deleted && intent.torrentExists ? this._mapReason(intent) + ' ' + intent.tracker : ''}`
     }
 
     _mapReason(intent) {

@@ -14,11 +14,11 @@ class FilesController {
             let intents = []
             for (const filename of files) {
                 const {name, extension} = getFilenameAndExtension(filename)
-                let { deleted, reason, torrentExists} = await  torrentService.deleteFromTorrentClient(name, extension)
+                let { deleted, reason, torrentExists, tracker} = await  torrentService.deleteFromTorrentClient(name, extension)
                 if (!torrentExists) {
                     deleted = storageService.removeFileOrFolder(name, extension)
                 }
-                intents.push({filename, deleted, reason, torrentExists})
+                intents.push({filename, deleted, reason, torrentExists, tracker})
             }
             console.log(intents.length + ' orphan torrents')
             await notificationService.notifyOrphanTorrents(intents)

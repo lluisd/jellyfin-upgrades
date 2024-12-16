@@ -42,7 +42,12 @@ class TorrentService {
                     await TransmissionApi.deleteTorrent(torrent.id)
                 }
             }
-            return {deleted: canDelete, reason, torrentExists: torrent !== undefined}
+            return {
+                deleted: canDelete,
+                reason,
+                torrentExists: torrent !== undefined,
+                tracker : torrent?.trackers?.[0]?.sitename || ''
+            }
         } catch (error) {
             throw new Error(`Error deleting torrent ${name}${extension}: ${error}`)
         }
