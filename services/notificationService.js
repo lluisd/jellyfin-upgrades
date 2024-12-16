@@ -2,6 +2,7 @@ import TelegramApi from '../api/telegramApi.js'
 import moment from "moment"
 import 'moment/locale/es.js'
 import {formatBytes} from "../utils/files.js";
+import {MovieStatus} from "./torrentService.js";
 moment.locale('es')
 
 class NotificationService {
@@ -36,24 +37,45 @@ class NotificationService {
         }
     }
 
-    async notifyOrphanTorrents(filenames) {
+
+
+    async notifyOrphanTorrents(intents) {
         try {
-            let elements = filenames
-            if (filenames.length > 20) {
-                elements = filenames.slice(0, 20).map((filename, index) => `*${index + 1}.* \`${filename}\``);
+            let elements = intents.sort((a, b) =>  b.deleted - a.deleted)
+            if (elements.length > 10) {
+                elements = elements.slice(0, 20).map(this._mapIntent.bind(this));
                 elements.push('...')
             } else {
-                elements = filenames.map(filename => `\`${filename}\``);
+                elements = elements.map(this._mapIntent.bind(this));
             }
 
-            const message = '* ' + filenames.length + ' orphan torrents*:\n ' + elements.join('\n')
+            const deletedTorrentsCount = intents.filter(intent => intent.deleted).length
+            const message = '*(' + deletedTorrentsCount + '/' + intents.length + ') torrents eliminados*:\n ' + elements.join('\n')
             console.log(message)
             await TelegramApi.notify(message)
         } catch (error) {
             throw error
         }
     }
+
+    _mapIntent(intent, index) {
+        return `*${index + 1}.* \`${intent.filename}\` ${intent.deleted ? '✔️' : '❌ '}${intent.deleted && intent.torrentExists ? '✔️' : ''}${!intent.deleted && intent.torrentExists ? this._mapReason(intent) : ''}`
+    }
+
+    _mapReason(intent) {
+        switch (intent.reason) {
+            case MovieStatus.DOWNLOAD_NOT_COMPLETED:
+                return '🔻'
+            case MovieStatus.NO_SEEDING:
+                return '⏸️'
+            case MovieStatus.INCOMPLETE_SEED_TIME:
+                return '⏳'
+            default:
+                return ''
+        }
+    }
 }
+
 
 const notificationService = new NotificationService()
 export default notificationService

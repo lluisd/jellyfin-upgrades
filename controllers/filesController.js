@@ -10,15 +10,18 @@ class FilesController {
         try {
             console.log('removing orphan torrents')
             const files = await storageService.getFilesWithoutHardlinks()
+
+            let intents = []
             for (const filename of files) {
-                // const {name, extension} = getFilenameAndExtension(filename)
-                // let { deleted, reason, torrentExists} = await  torrentService.deleteFromTorrentClient(name, extension)
-                // if (!torrentExists) {
-                //     deleted = storageService.removeFileOrFolder(name, extension)
-                // }
+                const {name, extension} = getFilenameAndExtension(filename)
+                let { deleted, reason, torrentExists} = await  torrentService.deleteFromTorrentClient(name, extension)
+                if (!torrentExists) {
+                    deleted = storageService.removeFileOrFolder(name, extension)
+                }
+                intents.push({filename, deleted, reason, torrentExists})
             }
-            console.log(files.length + ' orphan torrents')
-            await notificationService.notifyOrphanTorrents(files)
+            console.log(intents.length + ' orphan torrents')
+            await notificationService.notifyOrphanTorrents(intents)
             return files
         } catch (error) {
             throw error
