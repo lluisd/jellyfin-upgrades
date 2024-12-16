@@ -35,6 +35,24 @@ class NotificationService {
             throw error
         }
     }
+
+    async notifyOrphanTorrents(filenames) {
+        try {
+            let elements = filenames
+            if (filenames.length > 20) {
+                elements = filenames.slice(0, 20).map((filename, index) => `*${index + 1}.* \`${filename}\``);
+                elements.push('...')
+            } else {
+                elements = filenames.map(filename => `\`${filename}\``);
+            }
+
+            const message = '* ' + filenames.length + ' orphan torrents*:\n ' + elements.join('\n')
+            console.log(message)
+            await TelegramApi.notify(message)
+        } catch (error) {
+            throw error
+        }
+    }
 }
 
 const notificationService = new NotificationService()

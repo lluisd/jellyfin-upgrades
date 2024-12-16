@@ -1,4 +1,4 @@
-import fs from "fs"
+import fs from 'fs/promises';
 import {config } from '../config.js'
 import path from 'path'
 
@@ -21,19 +21,19 @@ class StorageService {
         }
     }
 
-    getFilesWithoutHardlinks() {
+    async getFilesWithoutHardlinks() {
         try {
             const filesWithoutHardlinks = [];
-            const files = fs.readdirSync(config.transmission.completeFolder)
+            const files = await fs.readdir(config.transmission.completeFolder)
 
-            files.forEach(file => {
-                const filePath = path.join(config.transmission.completeFolder, file)
-                const stats = fs.statSync(filePath)
+            await Promise.all(files.map(async (file) => {
+                const filePath = path.join(config.transmission.completeFolder, file);
+                const stats = await fs.stat(filePath);
 
                 if (stats.nlink === 1) {
-                    filesWithoutHardlinks.push(file)
+                    filesWithoutHardlinks.push(file);
                 }
-            });
+            }));
 
             return filesWithoutHardlinks
         } catch (error) {
