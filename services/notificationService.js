@@ -6,7 +6,7 @@ import {MovieStatus} from "./torrentService.js";
 moment.locale('es')
 
 class NotificationService {
-    async notifyUpgradedMovie(mediaMovie, dataMovie, oldDate, newSize, deleted, reason, torrentExists) {
+    async notifyUpgradedMovie(mediaMovie, dataMovie, oldDate, newSize, deleted, reason, torrentExists, tracker) {
         try {
             const message = '*Movie upgraded*: ' + mediaMovie.Name + ' (_' + dataMovie.tmdb + '_) \n' +
                 '*Fecha vieja*: ' + moment(oldDate).format('DD MMMM YYYY, h:mm:ss a') + '\n' +
@@ -16,7 +16,7 @@ class NotificationService {
                 '*Tamaño viejo*: ' + formatBytes(dataMovie.size) + '\n' +
                 '*Tamaño nuevo*: ' + formatBytes(newSize) + '\n' +
                 '*Archivo*: ' + (deleted ? '✔️ eliminado' : '❌ no eliminado') + '\n' +
-                '*Torrent*: ' + (deleted && torrentExists ? '✔️ eliminado' : '❌ no eliminado: ' + reason) + '\n'
+                '*Torrent*: ' + (deleted && torrentExists ? '✔️ eliminado' : '❌ no eliminado: ' + reason) + ' ' + tracker + '\n'
 
             console.log(message)
             await TelegramApi.notify(message)
@@ -37,7 +37,17 @@ class NotificationService {
         }
     }
 
-
+    async notifyDeletedMovie(dataMovie, deleted, reason, torrentExists, tracker) {
+        try {
+            const message = '*Movie deleted*: ' + dataMovie.name + ' (_' + dataMovie.tmdb + '_) \n' +
+                '*Archivo*: ' + (deleted ? '✔️ eliminado' : '❌ no eliminado') + '\n' +
+                '*Torrent*: ' + (deleted && torrentExists ? '✔️ eliminado' : '❌ no eliminado: ' + reason) + ' ' + tracker + '\n'
+            console.log(message)
+            await TelegramApi.notify(message)
+        } catch (error) {
+            throw error
+        }
+    }
 
     async notifyOrphanTorrents(intents) {
         try {
@@ -59,7 +69,7 @@ class NotificationService {
     }
 
     _mapIntent(intent, index) {
-        return `*${index + 1}.* \`${intent.filename}\` ${intent.deleted ? '✔️' : '❌ '}${intent.deleted && intent.torrentExists ? '✔️' : ''}${!intent.deleted && intent.torrentExists ? this._mapReason(intent) + ' ' + intent.tracker : ''}`
+        return `*${index + 1}.* \`${intent.filename}\` ${intent.deleted ? '✔️' : '❌ '}${intent.deleted && intent.torrentExists ? '✔️' : ''}${!intent.deleted && intent.torrentExists ? this._mapReason(intent) : ''} ${intent.tracker}`
     }
 
     _mapReason(intent) {

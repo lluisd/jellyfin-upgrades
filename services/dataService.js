@@ -33,6 +33,22 @@ class DataService {
         }
     }
 
+    async getMovieByJellyfinId(jellyfinId) {
+        try {
+            return await Mongo.getMovieByJellyfinId(jellyfinId)
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async deleteMovie(jellyfinId) {
+        try {
+            return await Mongo.deleteMovie(jellyfinId)
+        } catch (error) {
+            throw error
+        }
+    }
+
     async updatePathAndSize(tmdb, imdb, path, size) {
         try {
             return await Mongo.updateMovie(tmdb, imdb, {path: path, size: size})

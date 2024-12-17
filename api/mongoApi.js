@@ -35,6 +35,14 @@ async function updateMovie (tmdb, imdb, update) {
     }
 }
 
+async function getMovieByJellyfinId (jellyfinId) {
+    try {
+        return Movie.findOne({ jellyfinId: jellyfinId }).lean()
+    } catch (error) {
+        throw new Error(`Error getting movie from Mongodb: ${error}`)
+    }
+}
+
 async function getMovie (tmdb, imdb) {
     const filter = {
         $or: [
@@ -62,10 +70,20 @@ async function clearMovies () {
     }
 }
 
+async function deleteMovie (jellyfinId) {
+    try {
+        return Movie.deleteOne({ jellyfinId: jellyfinId });
+    } catch (error) {
+        throw new Error(`Error deleting movie from Mongodb: ${error}`)
+    }
+}
+
 export default  {
     addMovies,
     addMovie,
     updateMovie,
     getMovie,
-    clearMovies
+    clearMovies,
+    deleteMovie,
+    getMovieByJellyfinId
 }

@@ -31,11 +31,11 @@ class MoviesController {
         }
     }
 
-    async updateMovie (id, tmdb, imdb) {
+    async updateMovie (id, tmdb, imdb, jellyfinName) {
         const [ value, release ] = await semaphore.acquire()
         try {
             let response = 'nothing'
-            console.log(`upgrading movie: ${id} (tmdb: ${tmdb}, imdb: ${imdb})`)
+            console.log(`upgrading movie: ${id} ${jellyfinName} (tmdb: ${tmdb}, imdb: ${imdb})`)
 
             const dataMovie = await dataService.getMovie(tmdb, imdb)
             const mediaMovie = await mediaService.getMovie(id)
@@ -48,12 +48,12 @@ class MoviesController {
                 const newSize = mediaMovie?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
                 await dataService.updatePathAndSize(tmdb, imdb, mediaMovie.Path, newSize)
                 const {name, extension} = getFilenameAndExtension(dataMovie.path)
-                let {deleted, reason, torrentExists} = await torrentService.deleteFromTorrentClient(name, extension)
+                let {deleted, reason, torrentExists, tracker} = await torrentService.deleteFromTorrentClient(name, extension)
                 if (!torrentExists) {
                     deleted = storageService.removeFileOrFolder(name, extension)
                 }
 
-                await notificationService.notifyUpgradedMovie(mediaMovie, dataMovie, oldDate, newSize, deleted, reason, torrentExists)
+                await notificationService.notifyUpgradedMovie(mediaMovie, dataMovie, oldDate, newSize, deleted, reason, torrentExists, tracker)
 
                 response = `Movie upgraded: ${mediaMovie.Name} (tmdb: ${tmdb}, imdb: ${imdb})`
                 console.log(response)
@@ -64,6 +64,33 @@ class MoviesController {
                 response = `Movie created: ${mediaMovie.Name} (tmdb: ${tmdb}, imdb: ${imdb})`
                 console.log(response)
             }
+            return response
+        } catch (error) {
+            throw error
+        }  finally {
+            release()
+        }
+    }
+
+    async deleteMovie (id, tmdb, imdb, jellyfinName) {
+        const [ value, release ] = await semaphore.acquire()
+        try {
+            let response = 'nothing'
+            console.log(`deleting movie: ${id} ${jellyfinName} (tmdb: ${tmdb}, imdb: ${imdb})`)
+
+            const dataMovie = await dataService.getMovieByJellyfinId(id)
+
+            const {name, extension} = getFilenameAndExtension(dataMovie.path)
+            let {deleted, reason, torrentExists, tracker} = await torrentService.deleteFromTorrentClient(name, extension)
+            if (!torrentExists) {
+                deleted = storageService.removeFileOrFolder(name, extension)
+            }
+
+            await dataService.deleteMovie(id)
+            await notificationService.notifyDeletedMovie(dataMovie, deleted, reason, torrentExists, tracker)
+
+            response = `Movie deleted: ${dataMovie.name} (id: ${id}, tmdb: ${tmdb}, imdb: ${imdb})`
+            console.log(response)
             return response
         } catch (error) {
             throw error
