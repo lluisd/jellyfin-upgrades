@@ -1,6 +1,8 @@
-import fs from 'fs/promises';
+import fs from 'fs/promises'
 import {config } from '../config.js'
 import path from 'path'
+import {exists} from '../utils/files.js'
+
 
 class StorageService {
     async removeFileOrFolder(name, extension) {
@@ -9,12 +11,13 @@ class StorageService {
             const filePath = `${config.transmission.completeFolder}${name}${extension}`
             const folderPath = `${config.transmission.completeFolder}${name}`
 
-            const fileExists = await fs.access(filePath)
+            const fileExists = await exists(filePath)
+
             if (fileExists) {
                 await fs.unlink(filePath)
                 isDeleted = true
             } else {
-                const folderExists = await fs.access(folderPath)
+                const folderExists = await exists(folderPath)
                 if (folderExists) {
                     await fs.rmdir(filePath, {recursive: true})
                     isDeleted = true

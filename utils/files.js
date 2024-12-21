@@ -1,4 +1,5 @@
 import path from 'path'
+import fs from "fs/promises";
 
 export function getFilenameAndExtension (completePath) {
     const fileNameWithExt = path.basename(completePath)
@@ -21,4 +22,14 @@ export function formatBytes(bytes, decimals = 2) {
     const i = Math.floor(Math.log(bytes) / Math.log(k))
 
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
+
+
+export async function exists(filePath) {
+    try {
+        await fs.access(filePath);
+        return true;
+    } catch {
+        return false;
+    }
 }
