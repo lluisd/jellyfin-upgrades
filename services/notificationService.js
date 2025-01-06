@@ -60,7 +60,25 @@ class NotificationService {
             }
 
             const deletedTorrentsCount = intents.filter(intent => intent.deleted).length
-            const message = '*(' + deletedTorrentsCount + '/' + intents.length + ') torrents eliminados*:\n ' + elements.join('\n')
+            const message = '*(' + deletedTorrentsCount + '/' + intents.length + ') torrents eliminados*.\n ' + elements.join('\n')
+            console.log(message)
+            await TelegramApi.notify(message)
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async notifyTorrentsWithErrors(torrents) {
+        try {
+            let results = []
+            if (torrents.length > 10) {
+                results = torrents.slice(0, 20).map(this._mapTorrentWithError.bind(this));
+                results.push('...')
+            } else {
+                results = torrents.map(this._mapTorrentWithError.bind(this));
+            }
+
+            const message = '*' + torrents.length + ' torrents con errores*.\n ' + results.join('\n')
             console.log(message)
             await TelegramApi.notify(message)
         } catch (error) {
@@ -70,6 +88,25 @@ class NotificationService {
 
     _mapIntent(intent, index) {
         return `*${index + 1}.* \`${intent.filename}\` ${intent.deleted ? '✔️' : '❌ '}${intent.deleted && intent.torrentExists ? '✔️' : ''}${!intent.deleted && intent.torrentExists ? this._mapReason(intent) : ''} ${intent.tracker}`
+    }
+
+    _mapTorrentWithError(torrent, index) {
+        return `*${index + 1}.* \`${torrent.name}\` ${this._mapError(torrent.error)} ${torrent.errorString}`
+    }
+
+    _mapError(errorType) {
+        switch (errorType) {
+            case 0:
+                return '✔️'
+            case 1:
+                return '⚠️'
+            case 2:
+                return '❌'
+            case 3:
+                return  '💾'
+            default:
+                return ''
+        }
     }
 
     _mapReason(intent) {

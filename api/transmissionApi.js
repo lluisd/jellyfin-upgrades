@@ -19,6 +19,14 @@ async function getTorrent(name, extension) {
     }
 }
 
+async function getTorrents() {
+    try {
+        return transmission.get(false, ['id', 'name', 'trackers', 'status', 'error', 'errorString']);
+    } catch (error) {
+        throw new Error(`Error getting torrents: ${error}`)
+    }
+}
+
 async function deleteTorrent(id) {
     try {
         return await transmission.remove(id, true)
@@ -30,4 +38,5 @@ async function deleteTorrent(id) {
 export default  {
     getTorrent,
     deleteTorrent,
+    getTorrents
 }

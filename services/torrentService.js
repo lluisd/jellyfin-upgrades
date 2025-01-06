@@ -11,6 +11,20 @@ export const MovieStatus = {
 };
 
 class TorrentService {
+    async getTorrentsWithErrors() {
+        try {
+            let torrentsWithErrors = []
+            const {torrents} = await TransmissionApi.getTorrents()
+            for (const torrent of torrents) {
+                if (torrent.error !== 0) {
+                    torrentsWithErrors.push(torrent)
+                }
+            }
+            return torrentsWithErrors
+        } catch (error) {
+            throw new Error(`Error getting torrents: ${error}`)
+        }
+    }
     async deleteFromTorrentClient(name, extension) {
         try {
             let canDelete = false

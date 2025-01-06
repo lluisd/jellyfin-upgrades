@@ -29,6 +29,22 @@ class FilesController {
             release()
         }
     }
+
+    async notifyTorrentsWithErrors () {
+        const [ value, release ] = await semaphore.acquire()
+        try {
+            console.log('checking torrents with errors')
+            const torrents = await torrentService.getTorrentsWithErrors()
+
+            console.log(torrents.length + ' torrents with errors')
+            await notificationService.notifyTorrentsWithErrors(torrents)
+            return torrents
+        } catch (error) {
+            throw error
+        } finally {
+            release()
+        }
+    }
 }
 
 const filesController = new FilesController()

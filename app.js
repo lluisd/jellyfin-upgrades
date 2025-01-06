@@ -32,6 +32,20 @@ mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
         }
     })
 
+    app.get('/errors', async function(req, res, next) {
+        try {
+            const torrents = await filesController.notifyTorrentsWithErrors()
+            const response = {
+                message: torrents,
+                status: 'success'
+            };
+            res.json(response)
+        } catch (error) {
+            next(error)
+        }
+    })
+
+
     app.get('/health', function(req, res) {
         res.json({ status: 'UP' })
     })
@@ -89,6 +103,10 @@ mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
 
     cron.schedule('30 4 * * *', async () => {
         await filesController.removeTorrents()
+    })
+
+    cron.schedule('5 5 * * *', async () => {
+        await filesController.notifyTorrentsWithErrors()
     })
 })
 
