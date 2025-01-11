@@ -72,6 +72,21 @@ class MoviesController {
         }
     }
 
+    async notifyAVCMoviesWith10bits () {
+        const [ value, release ] = await semaphore.acquire()
+        try {
+            console.log('Checking movies with AVC 10-bits')
+            const movies = await mediaService.getAVC10bitsMovies()
+            await notificationService.notifyAVC10bitsMovies(movies)
+            console.log(movies.length + ' movies with AVC 10-bits')
+            return movies
+        } catch (error) {
+            throw error
+        } finally {
+            release()
+        }
+    }
+
     async deleteMovie (id, tmdb, imdb, jellyfinName) {
         const [ value, release ] = await semaphore.acquire()
         try {

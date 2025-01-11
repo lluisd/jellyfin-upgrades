@@ -60,7 +60,25 @@ class NotificationService {
             }
 
             const deletedTorrentsCount = intents.filter(intent => intent.deleted).length
-            const message = '*(' + deletedTorrentsCount + '/' + intents.length + ') torrents eliminados*.\n ' + elements.join('\n')
+            const message = '*(' + deletedTorrentsCount + '/' + intents.length + ') torrents eliminados*.\n' + elements.join('\n')
+            console.log(message)
+            await TelegramApi.notify(message)
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async notifyAVC10bitsMovies(movies){
+        try {
+            let results = []
+            if (movies.length > 10) {
+                results = movies.slice(0, 20).map(this._mapMovie.bind(this));
+                results.push('...')
+            } else {
+                results = movies.map(this._mapMovie.bind(this));
+            }
+
+            const message = '*' + movies.length + ' movies with h264 10-bits*.\n' + results.join('\n')
             console.log(message)
             await TelegramApi.notify(message)
         } catch (error) {
@@ -78,7 +96,7 @@ class NotificationService {
                 results = torrents.map(this._mapTorrentWithError.bind(this));
             }
 
-            const message = '*' + torrents.length + ' torrents con errores*.\n ' + results.join('\n')
+            const message = '*' + torrents.length + ' torrents con errores*.\n' + results.join('\n')
             console.log(message)
             await TelegramApi.notify(message)
         } catch (error) {
@@ -93,6 +111,11 @@ class NotificationService {
     _mapTorrentWithError(torrent, index) {
         return `*${index + 1}.* \`${torrent.name}\` ${this._mapError(torrent.error)} ${torrent.errorString}`
     }
+
+    _mapMovie(movie, index) {
+        return `*${index + 1}.* \`${movie.Name}\``
+    }
+
 
     _mapError(errorType) {
         switch (errorType) {

@@ -14,6 +14,25 @@ class MediaService {
         }
     }
 
+    async getAVC10bitsMovies() {
+        try {
+            const avc10bitMovies = []
+            const apiResponse = await JellyfinApi.getMoviesWithMediaStreams()
+
+            if (apiResponse && apiResponse.Items && apiResponse.Items.length > 0) {
+                for (const movie of apiResponse.Items) {
+                    movie?.MediaStreams?.find(stream => stream.Codec === 'h264' && stream.BitDepth === 10) ? avc10bitMovies.push(movie) : null
+                }
+                return avc10bitMovies
+            } else {
+                return []
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+
     async getMovie(id) {
         try {
             const apiResponse = await JellyfinApi.getMovie(id)

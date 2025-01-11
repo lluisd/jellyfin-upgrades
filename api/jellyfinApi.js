@@ -34,13 +34,29 @@ async function getMovies(hasLimit = false) {
             options.limit = 100;
         }
 
-        await getLibraryApi(api).postUpdatedMovies
         const result = await getItemsApi(api).getItems(options)
         return result.data
     } catch (error) {
         throw new Error(`Error getting movies from Jellyfin: ${error}`)
     }
 }
+
+async function getMoviesWithMediaStreams() {
+    try {
+        const options = {
+            isMovie: true,
+            parentId: config.jellyfin.libraryId,
+            fields: [ItemFields.MediaStreams],
+            hasTmdbId: true
+        }
+
+        const result = await getItemsApi(api).getItems(options)
+        return result.data
+    } catch (error) {
+        throw new Error(`Error getting movies with mediastreams from Jellyfin: ${error}`)
+    }
+}
+
 
 async function getMovie(id) {
     try {
@@ -87,5 +103,6 @@ async function updateMovie(movie) {
 export default  {
     getMovies,
     getMovie,
-    updateMovie
+    updateMovie,
+    getMoviesWithMediaStreams
 }
