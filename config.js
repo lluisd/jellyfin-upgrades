@@ -3,7 +3,8 @@ export const config = {
     jellyfin: {
         url: process.env.JELLYFIN_URL,
         apiKey: process.env.JELLYFIN_API_KEY,
-        libraryId: process.env.JELLYFIN_LIBRARY_ID
+        moviesLibraryId: process.env.JELLYFIN_MOVIES_LIBRARY_ID,
+        seriesLibraryId: process.env.JELLYFIN_SERIES_LIBRARY_ID,
     },
     port: process.env.PORT,
     trackers: JSON.parse(process.env.TRACKERS).reduce((acc, obj) => {

@@ -32,6 +32,36 @@ class MediaService {
         }
     }
 
+    async getTVShows() {
+        try {
+            const apiResponse = await JellyfinApi.getTVShows()
+            if (apiResponse && apiResponse.Items && apiResponse.Items.length > 0) {
+                return apiResponse.Items
+            } else {
+                return []
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
+    async getAVC10bitsEpisodes(seriesId) {
+        try {
+            const avc10bitEpisodes = []
+            const apiResponse = await JellyfinApi.getEpisodesWithMediaStreams(seriesId)
+
+            if (apiResponse && apiResponse.Items && apiResponse.Items.length > 0) {
+                for (const episode of apiResponse.Items) {
+                    episode?.MediaStreams?.find(stream => stream.Codec === 'h264' && stream.BitDepth === 10) ? avc10bitEpisodes.push(episode) : null
+                }
+                return avc10bitEpisodes
+            } else {
+                return []
+            }
+        } catch (error) {
+            throw error
+        }
+    }
 
     async getMovie(id) {
         try {

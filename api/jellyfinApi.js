@@ -4,7 +4,7 @@ import { getItemsApi } from '@jellyfin/sdk/lib/utils/api/items-api.js'
 import { getItemUpdateApi } from '@jellyfin/sdk/lib/utils/api/item-update-api.js'
 import { ItemFields } from '@jellyfin/sdk/lib/generated-client/index.js'
 import { ItemSortBy, SortOrder } from '@jellyfin/sdk/lib/generated-client/models/index.js'
-import {getLibraryApi} from "@jellyfin/sdk/lib/utils/api/index.js";
+import {getTvShowsApi} from "@jellyfin/sdk/lib/utils/api/index.js";
 
 const jellyfin = new Jellyfin({
     clientInfo: {
@@ -23,7 +23,7 @@ async function getMovies(hasLimit = false) {
     try {
         const options = {
             isMovie: true,
-            parentId: config.jellyfin.libraryId,
+            parentId: config.jellyfin.moviesLibraryId,
             fields: [ItemFields.DateCreated, ItemFields.OriginalTitle, ItemFields.ProviderIds, ItemFields.Path, ItemFields.MediaSources],
             sortBy: [ItemSortBy.DateCreated],
             sortOrder: SortOrder.Descending,
@@ -45,9 +45,8 @@ async function getMoviesWithMediaStreams() {
     try {
         const options = {
             isMovie: true,
-            parentId: config.jellyfin.libraryId,
-            fields: [ItemFields.MediaStreams],
-            hasTmdbId: true
+            parentId: config.jellyfin.moviesLibraryId,
+            fields: [ItemFields.MediaStreams]
         }
 
         const result = await getItemsApi(api).getItems(options)
@@ -57,6 +56,33 @@ async function getMoviesWithMediaStreams() {
     }
 }
 
+async function getTVShows() {
+    try {
+        const options = {
+            IsSeries: true,
+            parentId: config.jellyfin.seriesLibraryId
+        }
+
+        const result = await getItemsApi(api).getItems(options)
+        return result.data
+    } catch (error) {
+        throw new Error(`Error getting series from Jellyfin: ${error}`)
+    }
+}
+
+async function getEpisodesWithMediaStreams(serieId) {
+    try {
+        const options = {
+            seriesId: serieId,
+            fields: [ItemFields.MediaStreams]
+        }
+
+        const result = await getTvShowsApi(api).getEpisodes(options)
+        return result.data
+    } catch (error) {
+        throw new Error(`Error getting episodes from Jellyfin: ${error}`)
+    }
+}
 
 async function getMovie(id) {
     try {
@@ -64,7 +90,7 @@ async function getMovie(id) {
             {
                 ids: [id],
                 isMovie: true,
-                parentId:  config.jellyfin.libraryId,
+                parentId:  config.jellyfin.moviesLibraryId,
                 fields: [ItemFields.AirTime, ItemFields.CanDelete, ItemFields.CanDownload, ItemFields.ChannelInfo, ItemFields.Chapters,
                     ItemFields.Trickplay, ItemFields.ChildCount, ItemFields.CumulativeRunTimeTicks, ItemFields.CustomRating, ItemFields.DateCreated,
                     ItemFields.DateLastMediaAdded, ItemFields.DisplayPreferencesId, ItemFields.Etag, ItemFields.ExternalUrls, ItemFields.Genres,
@@ -104,5 +130,7 @@ export default  {
     getMovies,
     getMovie,
     updateMovie,
-    getMoviesWithMediaStreams
+    getMoviesWithMediaStreams,
+    getTVShows,
+    getEpisodesWithMediaStreams
 }

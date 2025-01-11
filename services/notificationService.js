@@ -86,6 +86,27 @@ class NotificationService {
         }
     }
 
+    async notifyAVC10bitsEpisodes(episodes){
+        try {
+            let results = []
+            if (episodes.length > 10) {
+                results = episodes.slice(0, 20).map(this._mapEpisode.bind(this));
+                results.push('...')
+            } else {
+                results = episodes.map(this._mapEpisode.bind(this));
+            }
+
+            if (episodes.length > 0) {
+                const message = '*' + episodes.length + ` episodes from ${episodes[0].SeriesName} with h264 10-bits*.
+` + results.join('\n')
+                console.log(message)
+                await TelegramApi.notify(message)
+            }
+        } catch (error) {
+            throw error
+        }
+    }
+
     async notifyTorrentsWithErrors(torrents) {
         try {
             let results = []
@@ -114,6 +135,10 @@ class NotificationService {
 
     _mapMovie(movie, index) {
         return `*${index + 1}.* \`${movie.Name}\``
+    }
+
+    _mapEpisode(episode, index) {
+        return `*${index + 1}.* \`${episode.Name}\``
     }
 
 

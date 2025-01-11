@@ -5,6 +5,7 @@ import express from "express"
 import moviesController from "./controllers/moviesController.js"
 import filesController from "./controllers/filesController.js"
 import cron from 'node-cron'
+import tvShowsController from "./controllers/tvShowsController.js"
 
 mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
     console.log('Connected')
@@ -45,11 +46,24 @@ mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
         }
     })
 
-    app.get('/avc10bits', async function(req, res, next) {
+    app.get('/avc10bitsMovies', async function(req, res, next) {
         try {
             const movies = await moviesController.notifyAVCMoviesWith10bits()
             const response = {
                 message: movies,
+                status: 'success'
+            };
+            res.json(response)
+        } catch (error) {
+            next(error)
+        }
+    })
+
+    app.get('/avc10bitsEpisodes', async function(req, res, next) {
+        try {
+            const episodes = await tvShowsController.notifyAVCEpisodesWith10bits()
+            const response = {
+                message: episodes,
                 status: 'success'
             };
             res.json(response)
@@ -123,6 +137,10 @@ mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
 
     cron.schedule('20 5 * * *', async () => {
         await moviesController.notifyAVCMoviesWith10bits()
+    })
+
+    cron.schedule('40 5 * * *', async () => {
+        await tvShowsController.notifyAVCEpisodesWith10bits()
     })
 })
 
