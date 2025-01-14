@@ -20,11 +20,24 @@ mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
 
     app.use(express.json())
 
-    app.get('/purge', async function(req, res, next) {
+    app.get('/purgeMovies', async function(req, res, next) {
         try {
-            const movies = await filesController.removeTorrents()
+            const movies = await filesController.removeMovieTorrents()
             const response = {
                 message: movies,
+                status: 'success'
+            };
+            res.json(response)
+        } catch (error) {
+            next(error)
+        }
+    })
+
+    app.get('/purgeSeries', async function(req, res, next) {
+        try {
+            const series = await filesController.removeSeriesTorrents()
+            const response = {
+                message: series,
                 status: 'success'
             };
             res.json(response)
@@ -128,7 +141,11 @@ mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
     })
 
     cron.schedule('30 4 * * *', async () => {
-        await filesController.removeTorrents()
+        await filesController.removeMovieTorrents()
+    })
+
+    cron.schedule('40 4 * * *', async () => {
+        await filesController.removeSeriesTorrents()
     })
 
     cron.schedule('5 5 * * *', async () => {

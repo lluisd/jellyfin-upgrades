@@ -12,6 +12,21 @@ export function getFilenameAndExtension (completePath) {
     }
 }
 
+export function isDirectFileName(filePath) {
+    const dirName = path.dirname(filePath)
+    const baseName = path.basename(filePath)
+    return dirName === '.' || dirName === baseName
+}
+
+export function hasOneParentFolder(filePath) {
+    const segments = filePath.split(path.sep);
+    return segments.length === 2;
+}
+
+export function getParentFolder(filePath) {
+    return path.basename(path.dirname(filePath))
+}
+
 export function formatBytes(bytes, decimals = 2) {
     if (!+bytes) return '0 Bytes'
 

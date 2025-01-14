@@ -5,6 +5,7 @@ import dataService from "../services/dataService.js"
 import notificationService from "../services/notificationService.js"
 import {getFilenameAndExtension} from '../utils/files.js'
 import semaphore from "../semaphore.js"
+import {config} from "../config.js";
 
 class MoviesController {
     async refreshMovies () {
@@ -50,7 +51,7 @@ class MoviesController {
                 const {name, extension} = getFilenameAndExtension(dataMovie.path)
                 let {deleted, reason, torrentExists, tracker} = await torrentService.deleteFromTorrentClient(name, extension)
                 if (!torrentExists) {
-                    deleted = storageService.removeFileOrFolder(name, extension)
+                    deleted = storageService.removeFileOrFolder(name, extension, config.transmission.moviesCompleteFolder)
                 }
 
                 await notificationService.notifyUpgradedMovie(mediaMovie, dataMovie, oldDate, newSize, deleted, reason, torrentExists, tracker)
@@ -98,7 +99,7 @@ class MoviesController {
             const {name, extension} = getFilenameAndExtension(dataMovie.path)
             let {deleted, reason, torrentExists, tracker} = await torrentService.deleteFromTorrentClient(name, extension)
             if (!torrentExists) {
-                deleted = storageService.removeFileOrFolder(name, extension)
+                deleted = storageService.removeFileOrFolder(name, extension, config.transmission.moviesCompleteFolder)
             }
 
             await dataService.deleteMovie(id)

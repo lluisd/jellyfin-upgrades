@@ -25,14 +25,14 @@ class TorrentService {
             throw new Error(`Error getting torrents: ${error}`)
         }
     }
-    async deleteFromTorrentClient(name, extension) {
+
+    async canDeleteFromTorrentClient(name, extension) {
         try {
-            let canDelete = false
+            let canDelete = true
             let reason = MovieStatus.NO_EXISTS
             const torrent = await TransmissionApi.getTorrent(name, extension)
             if (torrent) {
                 const minSeconds = this._getMinSeedTime(torrent.trackers)
-                canDelete = true
                 if (torrent.percentComplete !== 1) {
                     canDelete = false
                     reason = MovieStatus.DOWNLOAD_NOT_COMPLETED
@@ -50,17 +50,32 @@ class TorrentService {
                         }
                     }
                 }
-
-                if (canDelete) {
-                    reason = MovieStatus.DELETED
-                    await TransmissionApi.deleteTorrent(torrent.id)
-                }
             }
             return {
-                deleted: canDelete,
+                canDelete,
                 reason,
-                torrentExists: torrent !== undefined,
-                tracker : torrent?.trackers?.[0]?.sitename || ''
+                tracker : torrent?.trackers?.[0]?.sitename || '',
+                torrent: torrent
+            }
+        } catch (error) {
+            throw new Error(`Error on checking can delete torrent ${name}${extension}: ${error}`)
+        }
+
+    }
+
+    async deleteFromTorrentClient(name, extension = '') {
+        try {
+            const response = await this.canDeleteFromTorrentClient(name, extension)
+
+            if (response.torrent && response.canDelete) {
+                response.reason = MovieStatus.DELETED
+                await TransmissionApi.deleteTorrent(response.torrent.id)
+            }
+            return {
+                tracker: response.tracker,
+                torrentExists: response.torrent !== undefined,
+                deleted: response.torrent && response.canDelete,
+                reason: response.reason
             }
         } catch (error) {
             throw new Error(`Error deleting torrent ${name}${extension}: ${error}`)

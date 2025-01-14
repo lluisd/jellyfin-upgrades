@@ -17,7 +17,8 @@ export const config = {
         port: process.env.TRANSMISSION_PORT,
         username: process.env.TRANSMISSION_USERNAME,
         password: process.env.TRANSMISSION_PASSWORD,
-        completeFolder: process.env.TRANSMISSION_COMPLETE_FOLDER
+        moviesCompleteFolder: process.env.TRANSMISSION_MOVIES_COMPLETE_FOLDER,
+        seriesCompleteFolder: process.env.TRANSMISSION_SERIES_COMPLETE_FOLDER
     },
     telegram: {
         token: process.env.TELEGRAM_TOKEN,
