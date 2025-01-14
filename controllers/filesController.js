@@ -30,20 +30,20 @@ class FilesController {
                     torrentResult  =  await torrentService.deleteFromTorrentClient(name, extension)
                     deleted = torrentResult.deleted
                     if (!torrentResult.torrentExists) {
-                        deleted = storageService.removeFile(filename, rootFolder)
+                        deleted = await storageService.removeFile(filename, rootFolder)
                     }
                 } else if (isMovie && hasOneParentFolder(filename)) {
                     const folderName = getParentFolder(filename)
                     torrentResult = await torrentService.deleteFromTorrentClient(folderName)
                     deleted = torrentResult.deleted
                     if (!torrentResult.torrentExists) {
-                        deleted = storageService.removeFolder(folderName, rootFolder)
+                        deleted = await storageService.removeFolder(folderName, rootFolder)
                     }
                 } else {
                     const folderName = getParentFolder(filename)
                     torrentResult = await torrentService.canDeleteFromTorrentClient(folderName)
                     if (torrentResult.canDelete) {
-                        deleted = storageService.removeFolder(folderName, rootFolder)
+                        deleted = await storageService.removeFolder(folderName, rootFolder)
                     }
                 }
                 intents.push({filename, deleted, reason: torrentResult?.reason, torrentExists : torrentResult?.torrentExists, tracker: torrentResult?.tracker})

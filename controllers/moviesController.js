@@ -51,7 +51,7 @@ class MoviesController {
                 const {name, extension} = getFilenameAndExtension(dataMovie.path)
                 let {deleted, reason, torrentExists, tracker} = await torrentService.deleteFromTorrentClient(name, extension)
                 if (!torrentExists) {
-                    deleted = storageService.removeFileOrFolder(name, extension, config.transmission.moviesCompleteFolder)
+                    deleted = await storageService.removeFileOrFolder(name, extension, config.transmission.moviesCompleteFolder)
                 }
 
                 await notificationService.notifyUpgradedMovie(mediaMovie, dataMovie, oldDate, newSize, deleted, reason, torrentExists, tracker)
@@ -99,7 +99,7 @@ class MoviesController {
             const {name, extension} = getFilenameAndExtension(dataMovie.path)
             let {deleted, reason, torrentExists, tracker} = await torrentService.deleteFromTorrentClient(name, extension)
             if (!torrentExists) {
-                deleted = storageService.removeFileOrFolder(name, extension, config.transmission.moviesCompleteFolder)
+                deleted = await storageService.removeFileOrFolder(name, extension, config.transmission.moviesCompleteFolder)
             }
 
             await dataService.deleteMovie(id)

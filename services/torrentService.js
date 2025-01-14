@@ -55,6 +55,7 @@ class TorrentService {
                 canDelete,
                 reason,
                 tracker : torrent?.trackers?.[0]?.sitename || '',
+                torrentExists: torrent !== undefined,
                 torrent: torrent
             }
         } catch (error) {
@@ -73,7 +74,7 @@ class TorrentService {
             }
             return {
                 tracker: response.tracker,
-                torrentExists: response.torrent !== undefined,
+                torrentExists: response.torrentExists,
                 deleted: response.torrent && response.canDelete,
                 reason: response.reason
             }

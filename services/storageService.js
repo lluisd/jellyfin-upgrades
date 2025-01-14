@@ -1,5 +1,4 @@
 import fs from 'fs/promises'
-import {config } from '../config.js'
 import path from 'path'
 import {exists} from '../utils/files.js'
 
