@@ -16,7 +16,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "moment": "^2.30.1",
-    "mongoose": "^8.8.4",
+    "mongoose": "^8.9.5",
     "node-cron": "^3.0.3",
     "node-telegram-bot-api": "^0.66.0",
     "transmission-promise": "^1.1.7"
