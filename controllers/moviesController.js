@@ -42,7 +42,10 @@ class MoviesController {
             const mediaMovie = await mediaService.getMovie(id)
             const isSameMovie = mediaMovie?.Id === dataMovie?.jellyfinId
 
+            console.log(`${id}: isSameMovie: ${isSameMovie} mediaMovieId: ${mediaMovie?.Id} dataMovieId: ${dataMovie?.jellyfinId}`)
+
             if (mediaMovie && dataMovie && !isSameMovie) {
+                console.log('Upgrading: Movie already exists in database and jellyfin but it is not the same file')
                 const oldDate = mediaMovie.DateCreated
                 await mediaService.updateDateCreated(mediaMovie, dataMovie.dateCreated)
 
@@ -59,11 +62,14 @@ class MoviesController {
                 response = `Movie upgraded: ${mediaMovie.Name} (tmdb: ${tmdb}, imdb: ${imdb})`
                 console.log(response)
             } else if (mediaMovie && !dataMovie) {
+                console.log('Creating: Movie not found in dataMovie but found in jellyfin')
                 await dataService.addMovie(mediaService.createMovie(mediaMovie))
 
                 await notificationService.notifyAddedMovie(mediaMovie, tmdb)
                 response = `Movie created: ${mediaMovie.Name} (tmdb: ${tmdb}, imdb: ${imdb})`
                 console.log(response)
+            } else {
+                console.log('Movie not found in jellyfin neither in database')
             }
             return response
         } catch (error) {
