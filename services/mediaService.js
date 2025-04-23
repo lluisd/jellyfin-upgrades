@@ -67,8 +67,7 @@ class MediaService {
     async getMovie(id) {
         try {
             const apiResponse = await JellyfinApi.getMovie(id)
-            // Check if the movie is in the correct library because jellyfin api parentId filter doesn't filter correctly
-            if (apiResponse && apiResponse.Items && apiResponse.Items.length === 1 && apiResponse.Items[0].ParentId === config.jellyfin.moviesLibraryId) {
+            if (apiResponse && apiResponse.Items && apiResponse.Items.length === 1) {
                 return apiResponse.Items[0]
             } else {
                 return null

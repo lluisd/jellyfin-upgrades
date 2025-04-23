@@ -105,7 +105,7 @@ mongoose.connect(config.database, {dbName: 'jellyfin'}).then(() => {
     app.post('/addedMovie', async  function(req, res, next) {
         try {
             const data = req.body
-            console.log('Received added item webhook:', JSON.stringify(data, null, 2))
+            console.log('Received added item webhook: ' + JSON.stringify(data, null, 2))
             const result = await moviesController.updateMovie(data.id, data.tmdb, data.imdb, data.name)
             const response = {
                 message: result,
