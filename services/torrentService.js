@@ -1,4 +1,5 @@
 import TransmissionApi from '../api/transmissionApi.js'
+import RadarrApi from '../api/radarrApi.js'
 import moment from 'moment'
 import {config} from '../config.js'
 
@@ -26,11 +27,11 @@ class TorrentService {
         }
     }
 
-    async canDeleteFromTorrentClient(name, extension) {
+    async canDeleteFromTorrentClient(name, extension, applyRenamingFn = null) {
         try {
             let canDelete = true
             let reason = MovieStatus.NO_EXISTS
-            const torrent = await TransmissionApi.getTorrent(name, extension)
+            const torrent = await TransmissionApi.getTorrent(name, extension, applyRenamingFn)
             if (torrent) {
                 const minSeconds = this._getMinSeedTime(torrent.trackers)
                 if (torrent.percentComplete !== 1) {
@@ -61,12 +62,11 @@ class TorrentService {
         } catch (error) {
             throw new Error(`Error on checking can delete torrent ${name}${extension}: ${error}`)
         }
-
     }
 
-    async deleteFromTorrentClient(name, extension = '') {
+    async deleteFromTorrentClient(name, extension = '', applyRenamingFn = null) {
         try {
-            const response = await this.canDeleteFromTorrentClient(name, extension)
+            const response = await this.canDeleteFromTorrentClient(name, extension, applyRenamingFn)
 
             if (response.torrent && response.canDelete) {
                 response.reason = MovieStatus.DELETED

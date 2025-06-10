@@ -28,7 +28,7 @@ const MovieSchema = new Schema({
         required: false
     },
     size: {
-        type: Number,
+        type: Schema.Types.Double,
         required: false
     },
     lastModified: {

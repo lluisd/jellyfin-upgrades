@@ -1,5 +1,6 @@
 import {config } from '../config.js'
 import Transmission from 'transmission-promise'
+import RadarrNamingService from "../services/radarrNamingService.js"
 
 const transmission = new Transmission({
     host: config.transmission.host,
@@ -8,12 +9,19 @@ const transmission = new Transmission({
     password: config.transmission.password
 })
 
-async function getTorrent(name, extension) {
+async function getTorrent(name, extension, applyRenamingFn = null) {
     try {
         const apiResponse = await transmission.get(false, ['id', 'name', 'secondsSeeding', 'trackers',
             'activityDate', 'startDate', 'addedDate', 'doneDate', 'doneCompleted', 'status', 'seedIdleLimit',
-            'idleSecs', 'percentComplete']);
-        return apiResponse.torrents.find(torrent => torrent.name === `${name}${extension}` || torrent.name === name)
+            'idleSecs', 'percentComplete'])
+
+        return apiResponse.torrents.find(torrent =>  {
+            let torrentName = torrent.name
+            if (applyRenamingFn) {
+                torrentName = applyRenamingFn(torrent.name)
+            }
+            return torrentName === `${name}${extension}` || torrentName === name
+        })
     } catch (error) {
         throw new Error(`Error getting torrent ${name}${extension}: ${error}`)
     }

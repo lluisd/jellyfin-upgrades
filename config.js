@@ -23,5 +23,9 @@ export const config = {
     telegram: {
         token: process.env.TELEGRAM_TOKEN,
         channelId: process.env.TELEGRAM_CHAT_ID
+    },
+    radarr: {
+        url: process.env.RADARR_URL,
+        apiKey: process.env.RADARR_API_KEY
     }
 }

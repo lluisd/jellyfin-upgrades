@@ -4,7 +4,7 @@ import { getItemsApi } from '@jellyfin/sdk/lib/utils/api/items-api.js'
 import { getItemUpdateApi } from '@jellyfin/sdk/lib/utils/api/item-update-api.js'
 import { ItemFields } from '@jellyfin/sdk/lib/generated-client/index.js'
 import { ItemSortBy, SortOrder } from '@jellyfin/sdk/lib/generated-client/models/index.js'
-import {getTvShowsApi} from "@jellyfin/sdk/lib/utils/api/index.js";
+import { getTvShowsApi } from "@jellyfin/sdk/lib/utils/api/index.js"
 
 const jellyfin = new Jellyfin({
     clientInfo: {
