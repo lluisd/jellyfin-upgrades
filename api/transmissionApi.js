@@ -1,50 +1,83 @@
-import {config } from '../config.js'
+import { config } from '../config.js'
 import Transmission from 'transmission-promise'
-import RadarrNamingService from "../services/radarrNamingService.js"
 
-const transmission = new Transmission({
-    host: config.transmission.host,
-    port: config.transmission.port,
-    username: config.transmission.username,
-    password: config.transmission.password
-})
+export class TransmissionApi {
+  client = null
 
-async function getTorrent(name, extension, applyRenamingFn = null) {
+  constructor() {
+    this.client = new Transmission({
+      host: config.torrentClient.host,
+      port: config.torrentClient.port,
+      username: config.torrentClient.username,
+      password: config.torrentClient.password
+    })
+  }
+
+  async getTorrent(name, extension, applyRenamingFn = null) {
     try {
-        const apiResponse = await transmission.get(false, ['id', 'name', 'secondsSeeding', 'trackers',
-            'activityDate', 'startDate', 'addedDate', 'doneDate', 'doneCompleted', 'status', 'seedIdleLimit',
-            'idleSecs', 'percentComplete'])
+      const apiResponse = await this.client.get(false, [
+        'id',
+        'name',
+        'secondsSeeding',
+        'trackers',
+        'startDate',
+        'doneDate',
+        'status',
+        'percentComplete'
+      ])
 
-        return apiResponse.torrents.find(torrent =>  {
-            let torrentName = torrent.name
-            if (applyRenamingFn) {
-                torrentName = applyRenamingFn(torrent.name)
-            }
-            return torrentName === `${name}${extension}` || torrentName === name
-        })
+      const torrent = apiResponse.torrents.find((torrent) => {
+        let torrentName = torrent.name
+        if (applyRenamingFn) {
+          torrentName = applyRenamingFn(torrent.name)
+        }
+        return torrentName === `${name}${extension}` || torrentName === name
+      })
+
+      if (torrent) {
+        return {
+          id: torrent.hashString,
+          name: torrent.name,
+          secondsSeeding: torrent.secondsSeeding,
+          tracker: torrent?.trackers?.[0]?.sitename || '',
+          startDate: torrent.startDate,
+          dateCompleted: torrent.doneDate,
+          isSeeding: torrent.status === 6,
+          isCompleted: torrent.percentComplete === 1,
+          canRestSeedingOnRestart: true
+        }
+      }
     } catch (error) {
-        throw new Error(`Error getting torrent ${name}${extension}: ${error}`)
+      throw new Error(`Error getting torrent ${name}${extension}: ${error}`)
     }
-}
+  }
 
-async function getTorrents() {
+  async getTorrentsWithErrors() {
     try {
-        return transmission.get(false, ['id', 'name', 'trackers', 'status', 'error', 'errorString']);
+      let torrentsWithErrors = []
+      const { torrents } = await this.client.get(false, ['id', 'name', 'trackers', 'status', 'error', 'errorString'])
+      for (const torrent of torrents) {
+        if (torrent.error !== 0) {
+          const errorDetails = {
+            id: torrent.hashString,
+            name: torrent.name,
+            error: torrent.error,
+            errorString: torrent.errorString
+          }
+          torrentsWithErrors.push(errorDetails)
+        }
+      }
+      return torrentsWithErrors
     } catch (error) {
-        throw new Error(`Error getting torrents: ${error}`)
+      throw new Error(`Error getting torrents: ${error}`)
     }
-}
+  }
 
-async function deleteTorrent(id) {
+  async deleteTorrent(id) {
     try {
-        return await transmission.remove(id, true)
+      return await this.client.remove(id, true)
     } catch (error) {
-        throw new Error(`Error deleting torrent ${id}: ${error}`)
+      throw new Error(`Error deleting torrent ${id}: ${error}`)
     }
-}
-
-export default  {
-    getTorrent,
-    deleteTorrent,
-    getTorrents
+  }
 }
