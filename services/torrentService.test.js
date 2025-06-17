@@ -64,15 +64,29 @@ describe('TorrentService', () => {
 
       expect(result).toEqual({
         canDelete: true,
-        reason: MovieStatus.NO_EXISTS,
+        reason: MovieStatus.DEFAULT,
         tracker: 'example',
         torrentExists: true,
         torrent: expect.any(Object)
       })
     })
 
+    it('returns torrent no exists', async () => {
+      getTorrentMock.mockResolvedValue(undefined)
+
+      const result = await torrentService.canDeleteFromTorrentClient('movie', '.mkv')
+
+      expect(result).toEqual({
+        canDelete: true,
+        reason: MovieStatus.NO_EXISTS,
+        tracker: '',
+        torrentExists: false,
+        torrent: undefined
+      })
+    })
+
     it.each([
-      [432000, true, MovieStatus.NO_EXISTS],
+      [432000, true, MovieStatus.DEFAULT],
       [431999, false, MovieStatus.INCOMPLETE_SEED_TIME]
     ])(
       'checks default min seeding time of 5 days when tracker is unknown',
@@ -119,11 +133,11 @@ describe('TorrentService', () => {
     it.each([
       [0, 0, false, MovieStatus.INCOMPLETE_SEED_TIME],
       [2, 3, false, MovieStatus.INCOMPLETE_SEED_TIME],
-      [8, 2, true, MovieStatus.NO_EXISTS],
-      [8, 0, true, MovieStatus.NO_EXISTS],
-      [2, 8, true, MovieStatus.NO_EXISTS],
-      [0, 8, true, MovieStatus.NO_EXISTS],
-      [8, 8, true, MovieStatus.NO_EXISTS]
+      [8, 2, true, MovieStatus.DEFAULT],
+      [8, 0, true, MovieStatus.DEFAULT],
+      [2, 8, true, MovieStatus.DEFAULT],
+      [0, 8, true, MovieStatus.DEFAULT],
+      [8, 8, true, MovieStatus.DEFAULT]
     ])(
       'on seeding can be restarted returns false if torrent if has incomplete seeding time but completed %i days ago and started %i days ago',
       async (daysCompleted, daysStarted, canDelete, reason) => {

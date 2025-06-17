@@ -1,5 +1,5 @@
 import storageService from '../services/storageService.js'
-import torrentService from '../services/torrentService.js'
+import torrentService, { MovieStatus } from '../services/torrentService.js'
 import mediaService from '../services/mediaService.js'
 import dataService from '../services/dataService.js'
 import notificationService from '../services/notificationService.js'
@@ -33,7 +33,7 @@ class MoviesController {
     }
   }
 
-  async updateMovie(id, tmdb, imdb, jellyfinName) {
+  async updateMovie(id, tmdb, imdb, jellyfinName, notifyOnly = false) {
     const [value, release] = await semaphore.acquire()
     try {
       let response = 'nothing'
@@ -56,13 +56,35 @@ class MoviesController {
         await dataService.updatePathAndSize(tmdb, imdb, mediaMovie.Path, newSize)
         const { name, extension } = getFilenameAndExtension(dataMovie.path)
         await radarrNamingService.loadNamingConfig()
-        let { deleted, reason, torrentExists, tracker } = await torrentService.deleteFromTorrentClient(
-          name,
-          extension,
-          radarrNamingService.applyRenaming
-        )
-        if (!torrentExists) {
-          deleted = await storageService.removeFileOrFolder(name, extension, config.torrentClient.moviesCompleteFolder)
+        let deleted = false
+        let reason = MovieStatus.DEFAULT
+        let torrentExists
+        let tracker
+        if (notifyOnly) {
+          const canDeleteResponse = await torrentService.canDeleteFromTorrentClient(
+            name,
+            extension,
+            radarrNamingService.applyRenaming
+          )
+          torrentExists = canDeleteResponse.torrentExists
+          tracker = canDeleteResponse.tracker
+        } else {
+          const deleteResponse = await torrentService.deleteFromTorrentClient(
+            name,
+            extension,
+            radarrNamingService.applyRenaming
+          )
+          deleted = deleteResponse.deleted
+          reason = deleteResponse.reason
+          torrentExists = deleteResponse.torrentExists
+          tracker = deleteResponse.tracker
+          if (!torrentExists) {
+            deleted = await storageService.removeFileOrFolder(
+              name,
+              extension,
+              config.torrentClient.moviesCompleteFolder
+            )
+          }
         }
 
         await notificationService.notifyUpgradedMovie(

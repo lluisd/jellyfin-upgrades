@@ -4,26 +4,27 @@ ellyfin-upgrades is a Node.js project to manage Jellyfin media upgrades. It over
 ## Environment Variables
 To configure the project, set the following environment variables:
 
-| Variable Name                          | Description                                      | Example Value                          |
-|----------------------------------------|--------------------------------------------------|----------------------------------------|
-| `MONGODB_URI`                          | MongoDB connection string.                      | `mongodb://username:password@host:port` |
-| `JELLYFIN_URL`                         | URL of the Jellyfin server.                     | `http://jellyfin:8096`                 |
-| `JELLYFIN_API_KEY`                     | API key for Jellyfin.                           | `xxxxxx`                               |
-| `JELLYFIN_MOVIES_LIBRARY_ID`           | ID of the Jellyfin movies library.              | `5b0d238e2fxxxxxxxxxxxxxxxxe217`     |
-| `JELLYFIN_SERIES_LIBRARY_ID`           | ID of the Jellyfin series library.              | `10359ee834xxxxxxxxxxxxxxxxx073`     |
-| `TRACKERS`                             | JSON array mapping tracker sites to seeding days. | `[{"tracker1":3},{"tracker2":2}]`      |
-| `TORRENT_CLIENT`                       | Torrent client to use (`transmission` or `qbittorrent`). | `transmission`                         |
-| `TORRENT_CLIENT_HOST`                  | Hostname or IP address of the torrent client.   | `192.168.0.160`                        |
-| `TORRENT_CLIENT_PORT`                  | Port number for the torrent client.             | `9091`                                 |
-| `TORRENT_CLIENT_USERNAME`              | Username for torrent client authentication.     | `admin`                                |
-| `TORRENT_CLIENT_PASSWORD`              | Password for torrent client authentication.     | `password`                             |
-| `TORRENT_CLIENT_MOVIES_COMPLETE_FOLDER`| Path to the folder for completed movie torrents.| `/data1/torrents/complete/`            |
-| `TORRENT_CLIENT_SERIES_COMPLETE_FOLDER`| Path to the folder for completed series torrents.| `/data2/torrents/complete/`            |
-| `TELEGRAM_TOKEN`                       | Telegram bot token.                             | `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11` |
-| `TELEGRAM_CHAT_ID`                     | Telegram chat ID for notifications.             | `33243324`                              |
-| `RADARR_URL`                           | URL of the Radarr server.                       | `http://radarr:7878`                   |
-| `RADARR_API_KEY`                       | API key for Radarr.                             | `xxxxxx`                               |
-| `PORT`                                 | Port number for the application.                | `3000`                                 |
+| Variable Name                           | Description                                              | Example Value                               |
+|-----------------------------------------|----------------------------------------------------------|---------------------------------------------|
+| `MONGODB_URI`                           | MongoDB connection string.                               | `mongodb://username:password@host:port`     |
+| `JELLYFIN_URL`                          | URL of the Jellyfin server.                              | `http://jellyfin:8096`                      |
+| `JELLYFIN_API_KEY`                      | API key for Jellyfin.                                    | `xxxxxx`                                    |
+| `JELLYFIN_MOVIES_LIBRARY_ID`            | ID of the Jellyfin movies library.                       | `5b0d238e2fxxxxxxxxxxxxxxxxe217`            |
+| `JELLYFIN_SERIES_LIBRARY_ID`            | ID of the Jellyfin series library.                       | `10359ee834xxxxxxxxxxxxxxxxx073`            |
+| `TRACKERS`                              | JSON array mapping tracker sites to seeding days.        | `[{"tracker1":3},{"tracker2":2}]`           |
+| `TORRENT_CLIENT`                        | Torrent client to use (`transmission` or `qbittorrent`). | `transmission`                              |
+| `TORRENT_CLIENT_HOST`                   | Hostname or IP address of the torrent client.            | `192.168.0.160`                             |
+| `TORRENT_CLIENT_PORT`                   | Port number for the torrent client.                      | `9091`                                      |
+| `TORRENT_CLIENT_USERNAME`               | Username for torrent client authentication.              | `admin`                                     |
+| `TORRENT_CLIENT_PASSWORD`               | Password for torrent client authentication.              | `password`                                  |
+| `TORRENT_CLIENT_MOVIES_COMPLETE_FOLDER` | Path to the folder for completed movie torrents.         | `/data1/torrents/complete/`                 |
+| `TORRENT_CLIENT_SERIES_COMPLETE_FOLDER` | Path to the folder for completed series torrents.        | `/data2/torrents/complete/`                 |
+| `TORRENT_CLIENT_NOTIFY_ONLY`            | Only notify, never deletes torrents from disk.           | `true`                                      |
+| `TELEGRAM_TOKEN`                        | Telegram bot token.                                      | `123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11` |
+| `TELEGRAM_CHAT_ID`                      | Telegram chat ID for notifications.                      | `33243324`                                  |
+| `RADARR_URL`                            | URL of the Radarr server.                                | `http://radarr:7878`                        |
+| `RADARR_API_KEY`                        | API key for Radarr.                                      | `xxxxxx`                                    |
+| `PORT`                                  | Port number for the application.                         | `3000`                                      |
 
 
 ## Docker compose
@@ -51,6 +52,7 @@ services:
       - TELEGRAM_CHAT_ID=33243324
       - TRANSMISSION_MOVIES_COMPLETE_FOLDER=/data1/torrents/complete/
       - TRANSMISSION_SERIES_COMPLETE_FOLDER=/data2/torrents/complete/
+      - TORRENT_CLIENT_NOTIFY_ONLY=true
       - PORT=3000
     volumes:
       - /volume2/media1:/data1

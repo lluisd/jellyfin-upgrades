@@ -21,7 +21,8 @@ export const config = {
     username: process.env.TORRENT_CLIENT_USERNAME,
     password: process.env.TORRENT_CLIENT_PASSWORD,
     moviesCompleteFolder: process.env.TORRENT_CLIENT_MOVIES_COMPLETE_FOLDER,
-    seriesCompleteFolder: process.env.TORRENT_CLIENT_SERIES_COMPLETE_FOLDER
+    seriesCompleteFolder: process.env.TORRENT_CLIENT_SERIES_COMPLETE_FOLDER,
+    notifyOnly: (process.env.TORRENT_CLIENT_NOTIFY_ONLY || '').toLowerCase() === 'true'
   },
   telegram: {
     token: process.env.TELEGRAM_TOKEN,

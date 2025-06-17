@@ -4,6 +4,7 @@ import moment from 'moment'
 import { config } from '../config.js'
 
 export const MovieStatus = {
+  DEFAULT: '',
   NO_EXISTS: 'no existe',
   DOWNLOAD_NOT_COMPLETED: 'descarga incompleta',
   NO_SEEDING: 'no seedeando',
@@ -33,10 +34,10 @@ class TorrentService {
     }
   }
 
-  async canDeleteFromTorrentClient(name, extension, applyRenamingFn = null) {
+  async canDeleteFromTorrentClient(name, extension = '', applyRenamingFn = null) {
     try {
       let canDelete = true
-      let reason = MovieStatus.NO_EXISTS
+      let reason = MovieStatus.DEFAULT
       const torrent = await this.clienApi.getTorrent(name, extension, applyRenamingFn)
       if (torrent) {
         const minSeconds = this._getMinSeedTime(torrent.tracker)
@@ -68,6 +69,8 @@ class TorrentService {
             canDelete = false
           }
         }
+      } else {
+        reason = MovieStatus.NO_EXISTS
       }
       return {
         canDelete,

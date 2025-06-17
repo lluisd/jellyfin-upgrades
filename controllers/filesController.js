@@ -6,15 +6,15 @@ import notificationService from '../services/notificationService.js'
 import { config } from '../config.js'
 
 class FilesController {
-  async removeMovieTorrents() {
-    await this._removeTorrents(true, config.torrentClient.moviesCompleteFolder)
+  async removeMovieTorrents(notifyOnly = false) {
+    await this._removeTorrents(true, config.torrentClient.moviesCompleteFolder, notifyOnly)
   }
 
-  async removeSeriesTorrents() {
-    await this._removeTorrents(false, config.torrentClient.seriesCompleteFolder)
+  async removeSeriesTorrents(notifyOnly = false) {
+    await this._removeTorrents(false, config.torrentClient.seriesCompleteFolder, notifyOnly)
   }
 
-  async _removeTorrents(isMovie, rootFolder) {
+  async _removeTorrents(isMovie, rootFolder, notifyOnly) {
     const [value, release] = await semaphore.acquire()
     try {
       console.log('removing orphan torrents')
@@ -26,22 +26,30 @@ class FilesController {
         let deleted = false
         let torrentResult = {}
         if (isDirectFileName(filename)) {
-          torrentResult = await torrentService.deleteFromTorrentClient(name, extension)
-          deleted = torrentResult.deleted
-          if (!torrentResult.torrentExists) {
-            deleted = await storageService.removeFile(filename, rootFolder)
+          if (notifyOnly) {
+            torrentResult = await torrentService.canDeleteFromTorrentClient(name, extension)
+          } else {
+            torrentResult = await torrentService.deleteFromTorrentClient(name, extension)
+            deleted = torrentResult.deleted
+            if (!torrentResult.torrentExists) {
+              deleted = await storageService.removeFile(filename, rootFolder)
+            }
           }
         } else if (isMovie && hasOneParentFolder(filename)) {
           const folderName = getParentFolder(filename)
-          torrentResult = await torrentService.deleteFromTorrentClient(folderName)
-          deleted = torrentResult.deleted
-          if (!torrentResult.torrentExists) {
-            deleted = await storageService.removeFolder(folderName, rootFolder)
+          if (notifyOnly) {
+            torrentResult = await torrentService.canDeleteFromTorrentClient(folderName, extension)
+          } else {
+            torrentResult = await torrentService.deleteFromTorrentClient(folderName)
+            deleted = torrentResult.deleted
+            if (!torrentResult.torrentExists) {
+              deleted = await storageService.removeFolder(folderName, rootFolder)
+            }
           }
         } else {
           const folderName = getParentFolder(filename)
           torrentResult = await torrentService.canDeleteFromTorrentClient(folderName)
-          if (torrentResult.canDelete) {
+          if (!notifyOnly && torrentResult.canDelete) {
             deleted = await storageService.removeFolder(folderName, rootFolder)
           }
         }
