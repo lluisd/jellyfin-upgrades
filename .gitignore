@@ -7,3 +7,4 @@ node.log
 .vscode/
 public/images/*
 .cache/
+data/*

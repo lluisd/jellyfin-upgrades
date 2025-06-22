@@ -19,6 +19,20 @@ const jellyfin = new Jellyfin({
 
 const api = jellyfin.createApi(config.jellyfin.url, config.jellyfin.apiKey)
 
+async function getLibrariesIds() {
+  try {
+    const options = {
+      includeItemTypes: ['Collection'],
+      recursive: false
+    }
+
+    const libraries = await getItemsApi(api).getItems(options)
+    return libraries.data
+  } catch (error) {
+    throw new Error(`Error getting libraries from Jellyfin: ${error}`)
+  }
+}
+
 async function getMovies(hasLimit = false) {
   try {
     const options = {
@@ -184,5 +198,6 @@ export default {
   updateMovie,
   getMoviesWithMediaStreams,
   getTVShows,
-  getEpisodesWithMediaStreams
+  getEpisodesWithMediaStreams,
+  getLibrariesIds
 }

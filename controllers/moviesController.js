@@ -55,7 +55,7 @@ class MoviesController {
         const newSize = mediaMovie?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
         await dataService.updatePathAndSize(tmdb, imdb, mediaMovie.Path, newSize)
         const { name, extension } = getFilenameAndExtension(dataMovie.path)
-        await radarrNamingService.loadNamingConfig()
+        if (config.radarr.url) await radarrNamingService.loadNamingConfig()
         let deleted = false
         let reason = MovieStatus.DEFAULT
         let torrentExists
@@ -64,7 +64,7 @@ class MoviesController {
           const canDeleteResponse = await torrentService.canDeleteFromTorrentClient(
             name,
             extension,
-            radarrNamingService.applyRenaming
+            config.radarr.url ? radarrNamingService.applyRenaming : null
           )
           torrentExists = canDeleteResponse.torrentExists
           tracker = canDeleteResponse.tracker
@@ -72,7 +72,7 @@ class MoviesController {
           const deleteResponse = await torrentService.deleteFromTorrentClient(
             name,
             extension,
-            radarrNamingService.applyRenaming
+            config.radarr.url ? radarrNamingService.applyRenaming : null
           )
           deleted = deleteResponse.deleted
           reason = deleteResponse.reason

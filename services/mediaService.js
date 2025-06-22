@@ -1,7 +1,20 @@
 import JellyfinApi from '../api/jellyfinApi.js'
-import { config } from '../config.js'
+import { BaseItemKind } from '@jellyfin/sdk/lib/generated-client/models/base-item-kind.js'
 
 class MediaService {
+  async getLibraries() {
+    try {
+      const apiResponse = await JellyfinApi.getLibrariesIds()
+      if (apiResponse && apiResponse.Items && apiResponse.Items.length > 0) {
+        return apiResponse.Items.filter((lib) => lib.Type === BaseItemKind.Folder)
+      } else {
+        throw new Error('No libraries found in Jellyfin')
+      }
+    } catch (error) {
+      throw error
+    }
+  }
+
   async getMovies() {
     try {
       const apiResponse = await JellyfinApi.getMovies()
