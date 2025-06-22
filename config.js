@@ -42,5 +42,5 @@ export const config = {
     url: process.env.RADARR_URL,
     apiKey: process.env.RADARR_API_KEY
   },
-  debug: process.env.DEBUG.toLowerCase() === 'true'
+  debug: (process.env.DEBUG || '').toLowerCase() === 'true'
 }
