@@ -7,6 +7,7 @@ export class SQLiteApi {
 
   constructor() {
     const dbPath = path.join(config.database.sqlite.dbDir, `${config.database.sqlite.dbName}.db`)
+    console.log(`Connecting to SQLite database at ${dbPath}`)
     this.client = new Database(dbPath, { verbose: config.debug ? console.log : undefined })
     this.client.exec(`
       CREATE TABLE IF NOT EXISTS movies
