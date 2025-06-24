@@ -62,7 +62,7 @@ class FilesController {
         })
       }
       console.log(intents.length + ' orphan torrents')
-      await notificationService.notifyOrphanTorrents(intents)
+      await notificationService.notifyOrphanTorrents(intents, isMovie, notifyOnly)
       return files
     } catch (error) {
       throw error

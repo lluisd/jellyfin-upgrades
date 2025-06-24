@@ -92,7 +92,7 @@ class NotificationService {
     }
   }
 
-  async notifyOrphanTorrents(intents) {
+  async notifyOrphanTorrents(intents, isMovie, notifyOnly) {
     try {
       let elements = intents.sort((a, b) => b.deleted - a.deleted)
       if (elements.length > 10) {
@@ -104,7 +104,16 @@ class NotificationService {
 
       const deletedTorrentsCount = intents.filter((intent) => intent.deleted).length
       const message =
-        '*(' + deletedTorrentsCount + '/' + intents.length + ') torrents eliminados*.\n' + elements.join('\n')
+        '*(' +
+        deletedTorrentsCount +
+        '/' +
+        intents.length +
+        ') torrents de ' +
+        +(isMovie ? 'películas' : 'series') +
+        ' ' +
+        (notifyOnly ? 'que puedes eliminar' : 'eliminados') +
+        '*.\n' +
+        elements.join('\n')
       console.log(message)
       await TelegramApi.notify(message)
     } catch (error) {
@@ -122,7 +131,7 @@ class NotificationService {
         results = movies.map(this._mapMovie.bind(this))
       }
 
-      const message = '*' + movies.length + ' movies with h264 10-bits*.\n' + results.join('\n')
+      const message = '*' + movies.length + ' películas en h264 10-bits*.\n' + results.join('\n')
       console.log(message)
       await TelegramApi.notify(message)
     } catch (error) {
