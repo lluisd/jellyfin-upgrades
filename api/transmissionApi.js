@@ -55,7 +55,14 @@ export class TransmissionApi {
   async getTorrentsWithErrors() {
     try {
       let torrentsWithErrors = []
-      const { torrents } = await this.client.get(false, ['id', 'name', 'trackers', 'status', 'error', 'errorString'])
+      const { torrents } = await this.client.get(false, [
+        'hashString',
+        'name',
+        'trackers',
+        'status',
+        'error',
+        'errorString'
+      ])
       for (const torrent of torrents) {
         if (torrent.error !== 0) {
           const errorDetails = {
