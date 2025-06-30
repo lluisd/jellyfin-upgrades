@@ -109,7 +109,7 @@ class NotificationService {
         '/' +
         intents.length +
         ') torrents de ' +
-        +(isMovie ? 'películas' : 'series') +
+        (isMovie ? 'películas' : 'series') +
         ' ' +
         (notifyOnly ? 'que puedes eliminar' : 'eliminados') +
         '*.\n' +
