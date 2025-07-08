@@ -1,6 +1,8 @@
 import Movie from '../models/movie.js'
 import { config } from '../config.js'
 import mongoose from 'mongoose'
+import Episode from '../models/episode.js'
+import Orphan from '../models/orphan.js'
 
 export class MongoApi {
   client = null
@@ -27,6 +29,22 @@ export class MongoApi {
     }
   }
 
+  async addEpisodes(episodes) {
+    try {
+      return Episode.insertMany(episodes)
+    } catch (error) {
+      throw new Error(`Error adding episodes to Mongodb: ${error}`)
+    }
+  }
+
+  async addOrphans(orphans) {
+    try {
+      return Orphan.insertMany(orphans)
+    } catch (error) {
+      throw new Error(`Error adding orphans to Mongodb: ${error}`)
+    }
+  }
+
   async addMovie(movie) {
     try {
       return Movie.create(movie)
@@ -35,9 +53,17 @@ export class MongoApi {
     }
   }
 
-  async updateMovie(tmdb, imdb, path, size) {
+  async addEpisode(episode) {
+    try {
+      return Episode.create(episode)
+    } catch (error) {
+      throw new Error(`Error adding episode to Mongodb: ${error}`)
+    }
+  }
+
+  async updateMovie(tmdb, imdb, tvdb, path, size) {
     const filter = {
-      $or: [tmdb ? { tmdb: tmdb } : {}, imdb ? { imdb: imdb } : {}]
+      $or: [tmdb ? { tmdb: tmdb } : {}, imdb ? { imdb: imdb } : {}, tvdb ? { tvdb: tvdb } : {}]
     }
 
     if (Object.keys(filter.$or[0]).length === 0 && Object.keys(filter.$or[1]).length === 0) {
@@ -59,9 +85,9 @@ export class MongoApi {
     }
   }
 
-  async getMovie(tmdb, imdb) {
+  async getMovie(tmdb, imdb, tvdb) {
     const filter = {
-      $or: [tmdb ? { tmdb: tmdb } : {}, imdb ? { imdb: imdb } : {}]
+      $or: [tmdb ? { tmdb: tmdb } : {}, imdb ? { imdb: imdb } : {}, tvdb ? { tvdb: tvdb } : {}]
     }
 
     if (Object.keys(filter.$or[0]).length === 0 && Object.keys(filter.$or[1]).length === 0) {
@@ -75,11 +101,43 @@ export class MongoApi {
     }
   }
 
+  async getEpisode(tmdb, imdb, tvdb) {
+    const filter = {
+      $or: [tmdb ? { tmdb: tmdb } : {}, imdb ? { imdb: imdb } : {}, tvdb ? { tvdb: tvdb } : {}]
+    }
+
+    if (Object.keys(filter.$or[0]).length === 0 && Object.keys(filter.$or[1]).length === 0) {
+      return null
+    }
+
+    try {
+      return Episode.findOne(filter).lean()
+    } catch (error) {
+      throw new Error(`Error getting episode from Mongodb: ${error}`)
+    }
+  }
+
   async clearMovies() {
     try {
       return Movie.deleteMany()
     } catch (error) {
       throw new Error(`Error clearing movies from Mongodb: ${error}`)
+    }
+  }
+
+  async clearEpisodes() {
+    try {
+      return Episode.deleteMany()
+    } catch (error) {
+      throw new Error(`Error clearing episodes from Mongodb: ${error}`)
+    }
+  }
+
+  async clearOrphans(isMovie) {
+    try {
+      return Orphan.deleteMany({ isMovie: !!isMovie })
+    } catch (error) {
+      throw new Error(`Error clearing orphan ${isMovie ? 'movies' : 'series'} from Mongodb: ${error}`)
     }
   }
 

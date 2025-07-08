@@ -24,9 +24,41 @@ class DataService {
     }
   }
 
+  async clearEpisodes() {
+    try {
+      await this.dbApi.clearEpisodes()
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async clearOrphans(isMovie) {
+    try {
+      await this.dbApi.clearOrphans()
+    } catch (error) {
+      throw error
+    }
+  }
+
   async addMovies(movies) {
     try {
       await this.dbApi.addMovies(movies)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async addEpisodes(episodes) {
+    try {
+      await this.dbApi.addEpisodes(episodes)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async addOrphans(orphans) {
+    try {
+      await this.dbApi.addOrphans(orphans)
     } catch (error) {
       throw error
     }
@@ -40,9 +72,25 @@ class DataService {
     }
   }
 
-  async getMovie(tmdb, imdb) {
+  async addEpisode(movie) {
     try {
-      return await this.dbApi.getMovie(tmdb, imdb)
+      await this.dbApi.addEpisode(movie)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async getMovie(tmdb, imdb, tvdb) {
+    try {
+      return await this.dbApi.getMovie(tmdb, imdb, tvdb)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async getEpisode(tmdb, imdb, tvdb) {
+    try {
+      return await this.dbApi.getEpisode(tmdb, imdb, tvdb)
     } catch (error) {
       throw error
     }
@@ -64,9 +112,9 @@ class DataService {
     }
   }
 
-  async updatePathAndSize(tmdb, imdb, path, size) {
+  async updatePathAndSize(tmdb, imdb, tvdb, path, size) {
     try {
-      return await this.dbApi.updateMovie(tmdb, imdb, { path: path, size: size })
+      return await this.dbApi.updateMovie(tmdb, imdb, tvdb, { path: path, size: size })
     } catch (error) {
       throw error
     }

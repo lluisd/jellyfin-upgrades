@@ -2,18 +2,25 @@ import { jest } from '@jest/globals'
 
 global.fetch = jest.fn()
 
-jest.unstable_mockModule('../config.js', () => ({
-  config: {
-    radarr: {
-      url: 'http://mock-radarr-url',
-      apiKey: 'mock-api-key'
-    }
+// jest.unstable_mockModule('../config.js', () => ({
+//   config: {
+//     radarr: {
+//       url: 'http://mock-arr-url',
+//       apiKey: 'mock-api-key'
+//     }
+//   }
+// }))
+
+const { default: arrApi } = await import('./arrApi.js')
+
+const config = {
+  radarr: {
+    url: 'http://mock-arr-url',
+    apiKey: 'mock-api-key'
   }
-}))
+}
 
-const { default: radarrApi } = await import('./radarrApi.js')
-
-describe('RadarrApi', () => {
+describe('arrApi', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
@@ -26,10 +33,10 @@ describe('RadarrApi', () => {
         json: jest.fn().mockResolvedValue(mockResponse)
       })
 
-      const result = await radarrApi.getNamingConfig()
+      const result = await arrApi.getNamingConfig(config)
 
       expect(result).toEqual(mockResponse)
-      expect(fetch).toHaveBeenCalledWith('http://mock-radarr-url/api/v3/config/naming', {
+      expect(fetch).toHaveBeenCalledWith('http://mock-arr-url/api/v3/config/naming', {
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
@@ -45,13 +52,13 @@ describe('RadarrApi', () => {
         status: 500
       })
 
-      await expect(radarrApi.getNamingConfig()).rejects.toThrow('config radarr naming: 500')
+      await expect(arrApi.getNamingConfig(config)).rejects.toThrow('config arr naming: 500')
     })
 
     it('throws an error when the API call fails', async () => {
       fetch.mockRejectedValue(new Error('Network error'))
 
-      await expect(radarrApi.getNamingConfig()).rejects.toThrow('Network error')
+      await expect(arrApi.getNamingConfig(config)).rejects.toThrow('Network error')
     })
   })
 })

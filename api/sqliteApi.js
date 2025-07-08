@@ -19,6 +19,7 @@ export class SQLiteApi {
         path TEXT,
         tmdb TEXT,
         imdb TEXT,
+        tvdb TEXT,
         size REAL,
         lastModified TEXT DEFAULT CURRENT_TIMESTAMP
       )

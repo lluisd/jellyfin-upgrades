@@ -138,3 +138,32 @@ services:
       - 2003:3000
     restart: unless-stopped
 ````
+
+## Enable webhooks in Jellyfin
+
+To enable webhooks in Jellyfin you need to install the offical Webhooks plugin from the Jellyfin plugin cataloog.
+
+1. Add Generic Destination
+2. Set webhook Name:  `jellyfin movie upgrades`
+3. Set webhook URL: `http://192.168.0.160:2003/addedMovie`
+4. Check the box for `Enabled`
+4. Check the box for `Send on Item Added`
+5. Check the Item Types: `Movie` and `Trim leading and trailing whitespace from message body before sending` 
+6. Add the template
+```handlebars
+{
+    "id": "{{ItemId}}",
+    {{~#if_exist Provider_tmdb~}}
+        "tmdb": "{{Provider_tmdb}}",
+    {{~/if_exist~}}
+    {{~#if_exist Provider_imdb~}}
+        "imdb": "{{Provider_imdb}}",
+    {{~/if_exist~}}
+    "type": "{{ItemType}}",
+    "name": "{{{Name}}}"
+}
+```
+
+7. Add Request Headers:
+   - `content-type: application/json`
+7. Save the webhook

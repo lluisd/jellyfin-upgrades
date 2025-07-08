@@ -3,7 +3,7 @@ import torrentService, { MovieStatus } from '../services/torrentService.js'
 import mediaService from '../services/mediaService.js'
 import dataService from '../services/dataService.js'
 import notificationService from '../services/notificationService.js'
-import radarrNamingService from '../services/radarrNamingService.js'
+import radarrService from '../services/radarrService.js'
 import { getFilenameAndExtension } from '../utils/files.js'
 import semaphore from '../semaphore.js'
 import { config } from '../config.js'
@@ -33,13 +33,13 @@ class MoviesController {
     }
   }
 
-  async updateMovie(id, tmdb, imdb, jellyfinName, notifyOnly = false) {
+  async updateMovie(id, tmdb, imdb, tvdb, jellyfinName, notifyOnly = false) {
     const [value, release] = await semaphore.acquire()
     try {
       let response = 'nothing'
-      console.log(`upgrading movie: ${id} ${jellyfinName} (tmdb: ${tmdb}, imdb: ${imdb})`)
+      console.log(`upgrading movie: ${id} ${jellyfinName} (tmdb: ${tmdb}, imdb: ${imdb}, tvdb: ${tvdb})`)
 
-      const dataMovie = await dataService.getMovie(tmdb, imdb)
+      const dataMovie = await dataService.getMovie(tmdb, imdb, tvdb)
       const mediaMovie = await mediaService.getMovie(id)
       const isSameMovie = mediaMovie?.Id === dataMovie?.jellyfinId
 
@@ -55,7 +55,8 @@ class MoviesController {
         const newSize = mediaMovie?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
         await dataService.updatePathAndSize(tmdb, imdb, mediaMovie.Path, newSize)
         const { name, extension } = getFilenameAndExtension(dataMovie.path)
-        if (config.radarr.url) await radarrNamingService.loadNamingConfig()
+
+        if (config.radarr.url) await radarrService.loadNamingConfig()
         let deleted = false
         let reason = MovieStatus.DEFAULT
         let torrentExists
@@ -79,11 +80,7 @@ class MoviesController {
           torrentExists = deleteResponse.torrentExists
           tracker = deleteResponse.tracker
           if (!torrentExists) {
-            deleted = await storageService.removeFileOrFolder(
-              name,
-              extension,
-              config.torrentClient.moviesCompleteFolder
-            )
+            deleted = await storageService.removeFileOrFolder(name, extension, config.torrentClient.moviesFolder)
           }
         }
 
@@ -144,7 +141,7 @@ class MoviesController {
       const { name, extension } = getFilenameAndExtension(dataMovie.path)
       let { deleted, reason, torrentExists, tracker } = await torrentService.deleteFromTorrentClient(name, extension)
       if (!torrentExists) {
-        deleted = await storageService.removeFileOrFolder(name, extension, config.torrentClient.moviesCompleteFolder)
+        deleted = await storageService.removeFileOrFolder(name, extension, config.torrentClient.moviesFolder)
       }
 
       await dataService.deleteMovie(id)

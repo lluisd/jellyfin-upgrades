@@ -1,17 +1,15 @@
-import { config } from '../config.js'
-
-async function getNamingConfig() {
+async function getNamingConfig(config) {
   console.log(`Calling /api/v3/config/naming`)
   const endpoint = `${config.radarr.url}/api/v3/config/naming`
   const options = {
-    headers: _getHeaders(),
+    headers: _getHeaders(config),
     method: 'GET'
   }
 
   try {
     const response = await fetch(endpoint, options)
     if (!response.ok) {
-      throw new Error(`config radarr naming: ${response.status}`)
+      throw new Error(`config arr naming: ${response.status}`)
     }
     return await response.json()
   } catch (error) {
@@ -19,7 +17,7 @@ async function getNamingConfig() {
   }
 }
 
-function _getHeaders() {
+function _getHeaders(config) {
   return {
     Accept: 'application/json',
     'Content-Type': 'application/json',

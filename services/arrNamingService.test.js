@@ -1,34 +1,38 @@
 import { jest } from '@jest/globals'
 
 const getNamingConfigMock = jest.fn()
-jest.unstable_mockModule('../api/radarrApi.js', () => ({
+jest.unstable_mockModule('../api/arrApi.js', () => ({
   default: { getNamingConfig: getNamingConfigMock }
 }))
 
-const { default: radarrNamingService } = await import('./radarrNamingService.js')
+const { default: ArrNamingService } = await import('./arrNamingService.js')
 
-describe('RadarrNamingService', () => {
+describe('arrNamingService', () => {
   beforeEach(() => {
     getNamingConfigMock.mockClear()
   })
 
   describe('loadNamingConfig', () => {
-    it('loads naming config from RadarrApi', async () => {
+    it('loads naming config from arrApi', async () => {
       getNamingConfigMock.mockResolvedValue({
         replaceIllegalCharacters: false,
         colonReplacementFormat: 'smart'
       })
 
-      await radarrNamingService.loadNamingConfig()
+      const config = {}
+      const arrNamingService = new ArrNamingService(config)
+      await arrNamingService.loadNamingConfig()
 
-      expect(radarrNamingService.config.replaceIllegalCharacters).toBe(false)
-      expect(radarrNamingService.config.colonReplacementFormat).toBe('smart')
+      expect(arrNamingService.namingConfig.replaceIllegalCharacters).toBe(false)
+      expect(arrNamingService.namingConfig.colonReplacementFormat).toBe('smart')
     })
 
-    it('throws an error if RadarrApi fails', async () => {
+    it('throws an error if arrApi fails', async () => {
       getNamingConfigMock.mockRejectedValue(new Error('API error'))
 
-      await expect(radarrNamingService.loadNamingConfig()).rejects.toThrow('API error')
+      const config = {}
+      const arrNamingService = new ArrNamingService(config)
+      await expect(arrNamingService.loadNamingConfig()).rejects.toThrow('API error')
     })
   })
 
@@ -41,8 +45,11 @@ describe('RadarrNamingService', () => {
         replaceIllegalCharacters: true,
         colonReplacementFormat: 'dash'
       })
-      await radarrNamingService.loadNamingConfig()
-      const result = radarrNamingService.applyRenaming(input)
+
+      const config = {}
+      const arrNamingService = new ArrNamingService(config)
+      await arrNamingService.loadNamingConfig()
+      const result = arrNamingService.applyRenaming(input)
 
       expect(result).toBe(expected)
     })
@@ -55,8 +62,11 @@ describe('RadarrNamingService', () => {
         replaceIllegalCharacters: false,
         colonReplacementFormat: 'dash'
       })
-      await radarrNamingService.loadNamingConfig()
-      const result = radarrNamingService.applyRenaming(input)
+
+      const config = {}
+      const arrNamingService = new ArrNamingService(config)
+      await arrNamingService.loadNamingConfig()
+      const result = arrNamingService.applyRenaming(input)
 
       expect(result).toBe(expected)
     })
@@ -73,8 +83,11 @@ describe('RadarrNamingService', () => {
         replaceIllegalCharacters: true,
         colonReplacementFormat: format
       })
-      await radarrNamingService.loadNamingConfig()
-      const result = radarrNamingService.applyRenaming(input)
+
+      const config = {}
+      const arrNamingService = new ArrNamingService(config)
+      await arrNamingService.loadNamingConfig()
+      const result = arrNamingService.applyRenaming(input)
 
       expect(result).toBe(expected)
     })
@@ -83,7 +96,9 @@ describe('RadarrNamingService', () => {
       const input = '   .Test File Name.   '
       const expected = 'Test File Name.'
 
-      const result = radarrNamingService.applyRenaming(input)
+      const config = {}
+      const arrNamingService = new ArrNamingService(config)
+      const result = arrNamingService.applyRenaming(input)
 
       expect(result).toBe(expected)
     })

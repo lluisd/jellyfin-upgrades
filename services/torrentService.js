@@ -34,6 +34,15 @@ class TorrentService {
     }
   }
 
+  async getAllTorrents() {
+    try {
+      const torrents = await this.clienApi.getAllTorrents()
+      return torrents.map((torrent) => torrent.name)
+    } catch (error) {
+      throw new Error(`Error getting torrents: ${error}`)
+    }
+  }
+
   async canDeleteFromTorrentClient(name, extension = '', applyRenamingFn = null) {
     try {
       let canDelete = true

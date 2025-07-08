@@ -4,14 +4,16 @@ import { getFilenameAndExtension, getParentFolder, hasOneParentFolder, isDirectF
 import semaphore from '../semaphore.js'
 import notificationService from '../services/notificationService.js'
 import { config } from '../config.js'
+import dataService from '../services/dataService.js'
+import orphan from '../models/orphan.js'
 
 class FilesController {
   async removeMovieTorrents(notifyOnly = false) {
-    await this._removeTorrents(true, config.torrentClient.moviesCompleteFolder, notifyOnly)
+    await this._removeTorrents(true, config.torrentClient.moviesFolder, notifyOnly)
   }
 
   async removeSeriesTorrents(notifyOnly = false) {
-    await this._removeTorrents(false, config.torrentClient.seriesCompleteFolder, notifyOnly)
+    await this._removeTorrents(false, config.torrentClient.seriesFolder, notifyOnly)
   }
 
   async _removeTorrents(isMovie, rootFolder, notifyOnly) {
@@ -61,7 +63,7 @@ class FilesController {
           tracker: torrentResult?.tracker
         })
       }
-      console.log(intents.length + ' orphan torrents')
+      console.log(orphan.length + ' orphan torrents')
       await notificationService.notifyOrphanTorrents(intents, isMovie, notifyOnly)
       return files
     } catch (error) {
@@ -80,6 +82,59 @@ class FilesController {
       console.log(torrents.length + ' torrents with errors')
       await notificationService.notifyTorrentsWithErrors(torrents)
       return torrents
+    } catch (error) {
+      throw error
+    } finally {
+      release()
+    }
+  }
+
+  async notifyOrphanMovieFiles() {
+    await this._notifyOrphanFiles(config.torrentClient.moviesFolder, true)
+  }
+
+  async notifyOrphanSeriesFiles() {
+    await this._notifyOrphanFiles(config.torrentClient.seriesFolder, false)
+  }
+
+  async _notifyOrphanFiles(rootFolder, isMovie) {
+    const [value, release] = await semaphore.acquire()
+    try {
+      console.log('checking orphan files')
+      const files = await storageService.getAllFiles(rootFolder)
+
+      const filesDetails = []
+      for (const filename of files) {
+        const { name, extension, directory } = getFilenameAndExtension(filename)
+        filesDetails.push({
+          name,
+          extension,
+          directory
+        })
+      }
+
+      const torrentsNames = await torrentService.getAllTorrents()
+
+      const orphanFiles = filesDetails
+        .filter((file) => {
+          return !torrentsNames.some(
+            (torrentName) => torrentName === `${file.name}${file.extension}` || torrentName === file.name
+          )
+        })
+        .map((orphanFiles) => {
+          return {
+            name: orphanFiles.extension ? orphanFiles.name + orphanFiles.extension : orphanFiles.name,
+            path: orphanFiles.directory,
+            isMovie: isMovie
+          }
+        })
+
+      await dataService.clearOrphans(isMovie)
+      await dataService.addOrphans(orphanFiles)
+
+      console.log(orphanFiles.length + (isMovie ? 'movie' : 'series') + ' orphan files')
+      await notificationService.notifyOrphanTorrents(orphanFiles, isMovie)
+      return orphanFiles
     } catch (error) {
       throw error
     } finally {

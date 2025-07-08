@@ -47,6 +47,32 @@ app.get('/purgeSeries', async function (req, res, next) {
   }
 })
 
+app.get('/orphanMovies', async function (req, res, next) {
+  try {
+    const orphanMovies = await filesController.notifyOrphanMovieFiles()
+    const response = {
+      message: orphanMovies,
+      status: 'success'
+    }
+    res.json(response)
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.get('/orphanSeries', async function (req, res, next) {
+  try {
+    const orphanSeries = await filesController.notifyOrphanSeriesFiles()
+    const response = {
+      message: orphanSeries,
+      status: 'success'
+    }
+    res.json(response)
+  } catch (error) {
+    next(error)
+  }
+})
+
 app.get('/errors', async function (req, res, next) {
   try {
     const torrents = await filesController.notifyTorrentsWithErrors()
@@ -103,12 +129,51 @@ app.get('/refresh', async function (req, res, next) {
   }
 })
 
+app.get('/episodesRefresh', async function (req, res, next) {
+  try {
+    const episodes = await tvShowsController.refreshEpisodes()
+    const response = {
+      message: `Updated ${episodes.length} episodes`,
+      status: 'success'
+    }
+    res.json(response)
+  } catch (error) {
+    next(error)
+  }
+})
+
 app.post('/addedMovie', async function (req, res, next) {
   try {
     const isNotifyOnly = config.torrentClient.notifyOnly || req.query.notifyOnly !== undefined
     const data = req.body
-    console.log('Received added item webhook: ' + JSON.stringify(data, null, 2))
-    const result = await moviesController.updateMovie(data.id, data.tmdb, data.imdb, data.name, isNotifyOnly)
+    console.log('Received added movie item webhook: ' + JSON.stringify(data, null, 2))
+    const result = await moviesController.updateMovie(data.id, data.tmdb, data.imdb, data.tvdb, data.name, isNotifyOnly)
+    const response = {
+      message: result,
+      status: 'success'
+    }
+    res.json(response)
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.post('/addedEpisode', async function (req, res, next) {
+  try {
+    const isNotifyOnly = config.torrentClient.notifyOnly || req.query.notifyOnly !== undefined
+    const data = req.body
+    console.log('Received added episode item webhook: ' + JSON.stringify(data, null, 2))
+    const result = await tvShowsController.updateEpisode(
+      data.id,
+      data.tmdb,
+      data.imdb,
+      data.tvdb,
+      data.name,
+      data.seriesName,
+      data.seasonNumber,
+      data.episodeNumber,
+      isNotifyOnly
+    )
     const response = {
       message: result,
       status: 'success'
@@ -123,7 +188,7 @@ app.post('/deletedMovie', async function (req, res, next) {
   try {
     const data = req.body
     console.log('Received deleted item webhook:', data)
-    const result = await moviesController.deleteMovie(data.id, data.tmdb, data.imdb, data.name)
+    const result = await moviesController.deleteMovie(data.id, data.tmdb, data.imdb, data.tvdb, data.name)
     const response = {
       message: result,
       status: 'success'
@@ -139,11 +204,16 @@ const listener = app.listen(process.env.PORT, async () => {
   console.log('Database type: ', config.database.type)
   await configController.checkJellyfinLibraries()
   await moviesController.refreshMovies()
+  await tvShowsController.refreshEpisodes()
   await configController.checkTorrentFolders()
 })
 
 cron.schedule('0 4 * * *', async () => {
   await moviesController.refreshMovies()
+})
+
+cron.schedule('5 4 * * *', async () => {
+  await tvShowsController.refreshEpisodes()
 })
 
 cron.schedule('30 4 * * *', async () => {

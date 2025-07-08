@@ -8,8 +8,8 @@ jest.unstable_mockModule('../config.js', () => ({
       port: 'mock-port',
       username: 'mock-username',
       password: 'mock-password',
-      moviesCompleteFolder: 'mock-movies-complete-folder',
-      seriesCompleteFolder: 'mock-series-complete-folder'
+      moviesFolder: 'mock-movies-folder',
+      seriesFolder: 'mock-series-folder'
     }
   }
 }))

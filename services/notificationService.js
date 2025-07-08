@@ -48,6 +48,40 @@ class NotificationService {
     }
   }
 
+  async notifyUpgradedEpisode(mediaEpisode, dataEpisode, oldDate, newSize) {
+    try {
+      const message =
+        '*Episode upgraded*: ' +
+        mediaEpisode.Name +
+        ' (_' +
+        dataEpisode.tmdb +
+        '_) \n' +
+        '*Fecha vieja*: ' +
+        moment(oldDate).format('DD MMMM YYYY, h:mm:ss a') +
+        '\n' +
+        '*Fecha nueva*: ' +
+        moment(dataEpisode.dateCreated).format('DD MMMM YYYY, h:mm:ss a') +
+        '\n' +
+        '*Path viejo*: `' +
+        dataEpisode.path +
+        '`\n' +
+        '*Path nuevo*: `' +
+        mediaEpisode.Path +
+        '`\n' +
+        '*Tamaño viejo*: ' +
+        formatBytes(dataEpisode.size) +
+        '\n' +
+        '*Tamaño nuevo*: ' +
+        formatBytes(newSize) +
+        '\n'
+
+      console.log(message)
+      await TelegramApi.notify(message)
+    } catch (error) {
+      throw error
+    }
+  }
+
   async notifyAddedMovie(mediaMovie, tmdb) {
     try {
       const message =
@@ -61,6 +95,27 @@ class NotificationService {
         '\n' +
         '*Path*: `' +
         mediaMovie.Path +
+        '`\n'
+      console.log(message)
+      await TelegramApi.notify(message)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async notifyAddedEpisode(mediaEpisode, tmdb) {
+    try {
+      const message =
+        '*Episode added*: ' +
+        mediaEpisode.Name +
+        ' (_' +
+        tmdb +
+        '_) \n' +
+        '*Fecha*: ' +
+        moment(mediaEpisode.DateCreated).format('DD MMMM YYYY, h:mm:ss a') +
+        '\n' +
+        '*Path*: `' +
+        mediaEpisode.Path +
         '`\n'
       console.log(message)
       await TelegramApi.notify(message)
@@ -92,28 +147,9 @@ class NotificationService {
     }
   }
 
-  async notifyOrphanTorrents(intents, isMovie, notifyOnly) {
+  async notifyOrphanTorrents(orphans, isMovie) {
     try {
-      let elements = intents.sort((a, b) => b.deleted - a.deleted)
-      if (elements.length > 10) {
-        elements = elements.slice(0, 20).map(this._mapIntent.bind(this))
-        elements.push('...')
-      } else {
-        elements = elements.map(this._mapIntent.bind(this))
-      }
-
-      const deletedTorrentsCount = intents.filter((intent) => intent.deleted).length
-      const message =
-        '*(' +
-        deletedTorrentsCount +
-        '/' +
-        intents.length +
-        ') torrents de ' +
-        (isMovie ? 'películas' : 'series') +
-        ' ' +
-        (notifyOnly ? 'que puedes eliminar' : 'eliminados') +
-        '*.\n' +
-        elements.join('\n')
+      const message = orphans.length + (isMovie ? 'películas' : 'series') + ' huerfanas.\n' + elements.join('\n')
       console.log(message)
       await TelegramApi.notify(message)
     } catch (error) {

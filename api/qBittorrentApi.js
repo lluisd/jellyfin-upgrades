@@ -55,6 +55,25 @@ export class QBittorrentApi {
     }
   }
 
+  async getAllTorrents() {
+    try {
+      let result = []
+
+      let torrents = await this.client.listTorrents({
+        includeTrackers: true
+      })
+      for (const torrent of torrents) {
+        result.push({
+          name: torrent.name
+        })
+      }
+
+      return result
+    } catch (error) {
+      throw new Error(`Error getting all torrents: ${error}`)
+    }
+  }
+
   async getTorrentsWithErrors() {
     try {
       let torrentsWithErrors = []

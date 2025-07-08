@@ -38,21 +38,21 @@ class ConfigController {
   async checkTorrentFolders() {
     const [value, release] = await semaphore.acquire()
     try {
-      const { moviesCompleteFolder, seriesCompleteFolder } = config.torrentClient
-      if (!moviesCompleteFolder || !seriesCompleteFolder) {
+      const { moviesFolder, seriesFolder } = config.torrentClient
+      if (!moviesFolder || !seriesFolder) {
         console.error('Torrent client folders are not configured. Please check your configuration.')
         return
       }
-      const moviesCompleteFolderExists = await exists(moviesCompleteFolder)
-      if (!moviesCompleteFolderExists) {
-        console.error(`Movies complete folder does not exist: ${moviesCompleteFolder}`)
+      const moviesFolderExists = await exists(moviesFolder)
+      if (!moviesFolderExists) {
+        console.error(`Movies folder does not exist: ${moviesFolder}`)
       }
-      const seriesCompleteFolderExists = await exists(seriesCompleteFolder)
-      if (!seriesCompleteFolderExists) {
-        console.error(`TV Shows complete folder does not exist: ${seriesCompleteFolder}`)
+      const seriesFolderExists = await exists(seriesFolder)
+      if (!seriesFolderExists) {
+        console.error(`TV Shows folder does not exist: ${seriesFolder}`)
       }
 
-      if (moviesCompleteFolderExists && seriesCompleteFolderExists) {
+      if (moviesFolderExists && seriesFolderExists) {
         console.log(`Torrent client folders are correctly configured.`)
       }
     } catch (error) {

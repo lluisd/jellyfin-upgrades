@@ -77,6 +77,33 @@ class StorageService {
       throw new Error(`Error getting files without hardlinks: ${error}`)
     }
   }
+
+  async getAllFiles(rootFolder) {
+    try {
+      let files = []
+
+      const readDirRecursive = async (dir) => {
+        const files = await fs.readdir(dir)
+        await Promise.all(
+          files.map(async (file) => {
+            const filePath = path.join(dir, file)
+            const stats = await fs.stat(filePath)
+            if (stats.isDirectory()) {
+              await readDirRecursive(filePath)
+            } else {
+              const relativeFilePath = path.relative(rootFolder, filePath)
+              files.push(relativeFilePath)
+            }
+          })
+        )
+      }
+
+      await readDirRecursive(rootFolder)
+      return files
+    } catch (error) {
+      throw new Error(`Error getting files: ${error}`)
+    }
+  }
 }
 
 const storageService = new StorageService()

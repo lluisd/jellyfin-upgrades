@@ -31,8 +31,8 @@ export const config = {
     port: process.env.TORRENT_CLIENT_PORT,
     username: process.env.TORRENT_CLIENT_USERNAME,
     password: process.env.TORRENT_CLIENT_PASSWORD,
-    moviesCompleteFolder: process.env.TORRENT_CLIENT_MOVIES_COMPLETE_FOLDER,
-    seriesCompleteFolder: process.env.TORRENT_CLIENT_SERIES_COMPLETE_FOLDER
+    moviesFolder: process.env.TORRENT_CLIENT_MOVIES_FOLDER,
+    seriesFolder: process.env.TORRENT_CLIENT_SERIES_FOLDER
   },
   telegram: {
     token: process.env.TELEGRAM_TOKEN,
@@ -41,6 +41,10 @@ export const config = {
   radarr: {
     url: process.env.RADARR_URL,
     apiKey: process.env.RADARR_API_KEY
+  },
+  sonarr: {
+    url: process.env.SONARR_URL,
+    apiKey: process.env.SONARR_API_KEY
   },
   debug: (process.env.DEBUG || '').toLowerCase() === 'true'
 }

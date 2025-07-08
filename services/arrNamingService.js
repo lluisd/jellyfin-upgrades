@@ -1,15 +1,18 @@
-import RadarrApi from '../api/arrApi.js'
-import ArrNamingService from './arrNamingService.js'
+import arrApi from '../api/arrApi.js'
 
-class RadarrNamingService {
-  config = {}
+class ArrNamingService {
+  namingConfig = {}
+
+  constructor(config) {
+    this.config = config
+  }
 
   async loadNamingConfig() {
     try {
-      const config = await RadarrApi.getNamingConfig()
-      if (config) {
-        this.config.replaceIllegalCharacters = config.replaceIllegalCharacters
-        this.config.colonReplacementFormat = config.colonReplacementFormat
+      const namingConfig = await arrApi.getNamingConfig(this.config)
+      if (namingConfig) {
+        this.namingConfig.replaceIllegalCharacters = namingConfig.replaceIllegalCharacters
+        this.namingConfig.colonReplacementFormat = namingConfig.colonReplacementFormat
       }
     } catch (error) {
       throw error
@@ -25,11 +28,13 @@ class RadarrNamingService {
   }
 
   _replaceBadChars(input) {
+    const badCharacters = ['\\', '/', '<', '>', '?', '*', '|', '"']
+    const goodCharacters = ['+', '+', '', '', '!', '-', '', '']
     let result = input
 
     for (let i = 0; i < badCharacters.length; i++) {
       const badChar = badCharacters[i]
-      const replacement = this.config.replaceIllegalCharacters ? goodCharacters[i] : ''
+      const replacement = this.namingConfig.replaceIllegalCharacters ? goodCharacters[i] : ''
       const regex = new RegExp(this._escapeRegExp(badChar), 'g')
       result = result.replace(regex, replacement)
     }
@@ -43,13 +48,13 @@ class RadarrNamingService {
 
   _colonReplacement(input) {
     let result = input
-    if (this.config.replaceIllegalCharacters) {
-      if (this.config.colonReplacementFormat.toLowerCase() === 'smart') {
+    if (this.namingConfig.replaceIllegalCharacters) {
+      if (this.namingConfig.colonReplacementFormat.toLowerCase() === 'smart') {
         result = result.replace(/: /g, ' - ')
         result = result.replace(/:/g, '-')
       } else {
         let replacement = ''
-        switch (this.config.colonReplacementFormat.toLowerCase()) {
+        switch (this.namingConfig.colonReplacementFormat.toLowerCase()) {
           case 'dash':
             replacement = '-'
             break
@@ -69,5 +74,4 @@ class RadarrNamingService {
   }
 }
 
-const radarrNamingService = new RadarrNamingService()
-export default radarrNamingService
+export default ArrNamingService

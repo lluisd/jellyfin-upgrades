@@ -81,6 +81,19 @@ class MediaService {
     }
   }
 
+  async getEpisodes(seriesId) {
+    try {
+      const apiResponse = await JellyfinApi.getEpisodes(seriesId)
+      if (apiResponse && apiResponse.Items && apiResponse.Items.length > 0) {
+        return apiResponse.Items
+      } else {
+        return []
+      }
+    } catch (error) {
+      throw error
+    }
+  }
+
   async getMovie(id) {
     try {
       const apiResponse = await JellyfinApi.getMovie(id)
@@ -94,10 +107,23 @@ class MediaService {
     }
   }
 
-  async updateDateCreated(movie, dateCreated) {
+  async getEpisode(id) {
     try {
-      movie.dateCreated = dateCreated
-      return await JellyfinApi.updateMovie(movie)
+      const apiResponse = await JellyfinApi.getEpisode(id)
+      if (apiResponse && apiResponse.Items && apiResponse.Items.length === 1) {
+        return apiResponse.Items[0]
+      } else {
+        return null
+      }
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async updateDateCreated(item, dateCreated) {
+    try {
+      item.dateCreated = dateCreated
+      return await JellyfinApi.updateItem(item)
     } catch (error) {
       throw error
     }
@@ -110,8 +136,25 @@ class MediaService {
       dateCreated: movie.DateCreated,
       tmdb: movie?.ProviderIds?.Tmdb ?? '',
       imdb: movie?.ProviderIds?.Imdb ?? '',
+      tvdb: movie?.ProviderIds?.Tvdb ?? '',
       path: movie.Path,
       size: movie?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
+    }
+  }
+
+  createEpisode(episode) {
+    return {
+      jellyfinId: episode.Id,
+      name: episode.Name,
+      seriesName: episode.SeriesName,
+      seasonNumber: episode.ParentIndexNumber,
+      episodeNumber: episode.IndexNumber,
+      dateCreated: episode.DateCreated,
+      tmdb: episode?.ProviderIds?.Tmdb ?? '',
+      tvdb: episode?.ProviderIds?.Tvdb ?? '',
+      imdb: episode?.ProviderIds?.Imdb ?? '',
+      path: episode.Path,
+      size: episode?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
     }
   }
 }

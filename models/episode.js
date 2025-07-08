@@ -1,14 +1,26 @@
 import mongoose from 'mongoose'
 const Schema = mongoose.Schema
 
-/* Movie Schema */
-const MovieSchema = new Schema({
+/* Episode Schema */
+const EpisodeSchema = new Schema({
   jellyfinId: {
     type: String,
     required: true
   },
   name: {
     type: String,
+    required: true
+  },
+  seriesName: {
+    type: String,
+    required: true
+  },
+  seasonNumber: {
+    type: Number,
+    required: true
+  },
+  episodeNumber: {
+    type: Number,
     required: true
   },
   dateCreated: {
@@ -41,5 +53,5 @@ const MovieSchema = new Schema({
   }
 })
 
-const Movie = mongoose.model('movie', MovieSchema, 'movies')
-export default Movie
+const Episode = mongoose.model('episode', EpisodeSchema, 'episodes')
+export default Episode

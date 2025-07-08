@@ -52,6 +52,16 @@ export class TransmissionApi {
     }
   }
 
+  async getAllTorrents() {
+    try {
+      return await this.client.listTorrents({
+        includeTrackers: true
+      })
+    } catch (error) {
+      throw new Error(`Error getting all torrents: ${error}`)
+    }
+  }
+
   async getTorrentsWithErrors() {
     try {
       let torrentsWithErrors = []
