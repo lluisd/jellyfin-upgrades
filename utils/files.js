@@ -5,12 +5,10 @@ export function getFilenameAndExtension(completePath) {
   const fileNameWithExt = path.basename(completePath)
   const fileNameWithoutExt = path.parse(fileNameWithExt).name
   const fileExtension = path.extname(completePath)
-  const fileDirectory = path.dirname(completePath)
 
   return {
     name: fileNameWithoutExt,
-    extension: fileExtension,
-    directory: fileDirectory
+    extension: fileExtension
   }
 }
 

@@ -149,7 +149,7 @@ class NotificationService {
 
   async notifyOrphanTorrents(orphans, isMovie) {
     try {
-      const message = orphans.length + (isMovie ? 'películas' : 'series') + ' huerfanas.\n' + elements.join('\n')
+      const message = orphans.length + (isMovie ? ' películas' : ' series') + ' huerfanas.\n'
       console.log(message)
       await TelegramApi.notify(message)
     } catch (error) {

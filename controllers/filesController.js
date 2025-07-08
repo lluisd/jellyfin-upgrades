@@ -105,11 +105,10 @@ class FilesController {
 
       const filesDetails = []
       for (const filename of files) {
-        const { name, extension, directory } = getFilenameAndExtension(filename)
+        const { name, extension } = getFilenameAndExtension(filename)
         filesDetails.push({
           name,
-          extension,
-          directory
+          extension
         })
       }
 
@@ -121,10 +120,9 @@ class FilesController {
             (torrentName) => torrentName === `${file.name}${file.extension}` || torrentName === file.name
           )
         })
-        .map((orphanFiles) => {
+        .map((matchedFile) => {
           return {
-            name: orphanFiles.extension ? orphanFiles.name + orphanFiles.extension : orphanFiles.name,
-            path: orphanFiles.directory,
+            name: matchedFile.extension ? matchedFile.name + matchedFile.extension : matchedFile.name,
             isMovie: isMovie
           }
         })

@@ -7,10 +7,6 @@ const OrphanSchema = new Schema({
     type: String,
     required: true
   },
-  path: {
-    type: String,
-    required: true
-  },
   isMovie: {
     type: Boolean,
     required: true

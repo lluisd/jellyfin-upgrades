@@ -3,10 +3,6 @@ import notificationService from '../services/notificationService.js'
 import semaphore from '../semaphore.js'
 import dataService from '../services/dataService.js'
 import { getFilenameAndExtension } from '../utils/files.js'
-import { config } from '../config.js'
-import radarrNamingService from '../services/radarrNamingService.js'
-import torrentService, { MovieStatus } from '../services/torrentService.js'
-import storageService from '../services/storageService.js'
 
 class TvShowsController {
   async refreshEpisodes() {
