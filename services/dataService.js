@@ -34,7 +34,7 @@ class DataService {
 
   async clearOrphans(isMovie) {
     try {
-      await this.dbApi.clearOrphans()
+      await this.dbApi.clearOrphans(isMovie)
     } catch (error) {
       throw error
     }
