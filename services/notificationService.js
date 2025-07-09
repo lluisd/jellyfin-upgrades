@@ -54,7 +54,7 @@ class NotificationService {
         '*Episode upgraded*: ' +
         mediaEpisode.Name +
         ' (_' +
-        dataEpisode.tmdb +
+        dataEpisode.tvdb +
         '_) \n' +
         '*Fecha vieja*: ' +
         moment(oldDate).format('DD MMMM YYYY, h:mm:ss a') +
@@ -103,13 +103,13 @@ class NotificationService {
     }
   }
 
-  async notifyAddedEpisode(mediaEpisode, tmdb) {
+  async notifyAddedEpisode(mediaEpisode, tvdb) {
     try {
       const message =
         '*Episode added*: ' +
         mediaEpisode.Name +
         ' (_' +
-        tmdb +
+        tvdb +
         '_) \n' +
         '*Fecha*: ' +
         moment(mediaEpisode.DateCreated).format('DD MMMM YYYY, h:mm:ss a') +

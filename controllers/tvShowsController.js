@@ -88,7 +88,7 @@ class TvShowsController {
         console.log('Creating: Episode not found in dataEpisode but found in jellyfin')
         await dataService.addEpisode(mediaService.createEpisode(mediaEpisode))
 
-        await notificationService.notifyAddedEpisode(mediaEpisode, tmdb)
+        await notificationService.notifyAddedEpisode(mediaEpisode, tvdb)
         response = `Episode created: ${mediaEpisode.Name} (tmdb: ${tmdb}, imdb: ${imdb}, tvdb: ${tvdb})`
         console.log(response)
       } else {

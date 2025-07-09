@@ -53,7 +53,7 @@ class MoviesController {
         await mediaService.updateDateCreated(mediaMovie, dataMovie.dateCreated)
 
         const newSize = mediaMovie?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
-        await dataService.updatePathAndSize(tmdb, imdb, mediaMovie.Path, newSize)
+        await dataService.updatePathAndSize(tmdb, imdb, tvdb, mediaMovie.Path, newSize)
         const { name, extension } = getFilenameAndExtension(dataMovie.path)
 
         if (config.radarr.url) await radarrService.loadNamingConfig()
@@ -95,14 +95,14 @@ class MoviesController {
           tracker
         )
 
-        response = `Movie upgraded: ${mediaMovie.Name} (tmdb: ${tmdb}, imdb: ${imdb})`
+        response = `Movie upgraded: ${mediaMovie.Name} (tmdb: ${tmdb}, imdb: ${imdb}, tvdb: ${tvdb})`
         console.log(response)
       } else if (mediaMovie && !dataMovie) {
         console.log('Creating: Movie not found in dataMovie but found in jellyfin')
         await dataService.addMovie(mediaService.createMovie(mediaMovie))
 
         await notificationService.notifyAddedMovie(mediaMovie, tmdb)
-        response = `Movie created: ${mediaMovie.Name} (tmdb: ${tmdb}, imdb: ${imdb})`
+        response = `Movie created: ${mediaMovie.Name} (tmdb: ${tmdb}, imdb: ${imdb}. tvdb: ${tvdb})`
         console.log(response)
       } else {
         console.log('Movie not found in jellyfin neither in database')
