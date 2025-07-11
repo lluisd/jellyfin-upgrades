@@ -22,7 +22,7 @@ const api = jellyfin.createApi(config.jellyfin.url, config.jellyfin.apiKey)
 async function getLibrariesIds() {
   try {
     const options = {
-      includeItemTypes: ['Collection'],
+      includeItemTypes: ['Folder'],
       recursive: false
     }
 
@@ -38,6 +38,7 @@ async function getMovies(hasLimit = false) {
     const options = {
       isMovie: true,
       parentId: config.jellyfin.moviesLibraryId,
+      includeItemTypes: ['Movie'],
       fields: [
         ItemFields.DateCreated,
         ItemFields.OriginalTitle,
@@ -66,6 +67,7 @@ async function getMoviesWithMediaStreams() {
     const options = {
       isMovie: true,
       parentId: config.jellyfin.moviesLibraryId,
+      includeItemTypes: ['Movie'],
       fields: [ItemFields.MediaStreams]
     }
 
@@ -80,6 +82,7 @@ async function getTVShows() {
   try {
     const options = {
       IsSeries: true,
+      includeItemTypes: ['Series'],
       parentId: config.jellyfin.seriesLibraryId
     }
 
@@ -128,6 +131,7 @@ async function getMovie(id) {
     const result = await getItemsApi(api).getItems({
       ids: [id],
       isMovie: true,
+      includeItemTypes: ['Movie'],
       parentId: config.jellyfin.moviesLibraryId,
       fields: [
         ItemFields.AirTime,
@@ -216,7 +220,7 @@ async function getEpisode(id) {
     const result = await getItemsApi(api).getItems({
       ids: [id],
       parentId: config.jellyfin.seriesLibraryId,
-      includeItemTypes: [ItemTypes.Episode],
+      includeItemTypes: ['Episode'],
       mediaTypes: [ItemFields.Video],
       fields: [
         ItemFields.AirTime,
