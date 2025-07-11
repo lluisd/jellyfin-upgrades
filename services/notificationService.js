@@ -147,6 +147,35 @@ class NotificationService {
     }
   }
 
+  async notifyTorrentsWithoutHardlinks(intents, isMovie, notifyOnly) {
+    try {
+      let elements = intents.sort((a, b) => b.deleted - a.deleted)
+      if (elements.length > 10) {
+        elements = elements.slice(0, 20).map(this._mapIntent.bind(this))
+        elements.push('...')
+      } else {
+        elements = elements.map(this._mapIntent.bind(this))
+      }
+
+      const deletedTorrentsCount = intents.filter((intent) => intent.deleted).length
+      const message =
+        '*(' +
+        deletedTorrentsCount +
+        '/' +
+        intents.length +
+        ') torrents de ' +
+        (isMovie ? 'películas' : 'series') +
+        ' ' +
+        (notifyOnly ? 'que puedes eliminar' : 'eliminados') +
+        '*.\n' +
+        elements.join('\n')
+      console.log(message)
+      await TelegramApi.notify(message)
+    } catch (error) {
+      throw error
+    }
+  }
+
   async notifyOrphanTorrents(orphans, isMovie) {
     try {
       const message = orphans.length + (isMovie ? ' películas' : ' series') + ' huerfanas.\n'

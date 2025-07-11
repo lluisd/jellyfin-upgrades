@@ -63,8 +63,8 @@ class FilesController {
           tracker: torrentResult?.tracker
         })
       }
-      console.log(orphan.length + ' orphan torrents')
-      await notificationService.notifyOrphanTorrents(intents, isMovie, notifyOnly)
+      console.log(intents.length + ' torrents without hardlinks')
+      await notificationService.notifyTorrentsWithoutHardlinks(intents, isMovie, notifyOnly)
       return files
     } catch (error) {
       throw error
