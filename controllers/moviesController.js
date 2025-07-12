@@ -53,7 +53,7 @@ class MoviesController {
         await mediaService.updateDateCreated(mediaMovie, dataMovie.dateCreated)
 
         const newSize = mediaMovie?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
-        await dataService.updatePathAndSize(tmdb, imdb, tvdb, mediaMovie.Path, newSize)
+        await dataService.updateMoviePathAndSize(tmdb, imdb, tvdb, mediaMovie.Path, newSize)
         const { name, extension } = getFilenameAndExtension(dataMovie.path)
 
         if (config.radarr.url) await radarrService.loadNamingConfig()

@@ -77,7 +77,7 @@ class TvShowsController {
         await mediaService.updateDateCreated(mediaEpisode, dataEpisode.dateCreated)
 
         const newSize = mediaEpisode?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
-        await dataService.updatePathAndSize(tmdb, imdb, tvdb, mediaEpisode.Path, newSize)
+        await dataService.updateEpisodePathAndSize(tmdb, imdb, tvdb, mediaEpisode.Path, newSize)
         const { name, extension } = getFilenameAndExtension(dataEpisode.path)
 
         await notificationService.notifyUpgradedEpisode(mediaEpisode, dataEpisode, oldDate, newSize)

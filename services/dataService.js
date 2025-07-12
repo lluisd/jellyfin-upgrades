@@ -112,9 +112,17 @@ class DataService {
     }
   }
 
-  async updatePathAndSize(tmdb, imdb, tvdb, path, size) {
+  async updateMoviePathAndSize(tmdb, imdb, tvdb, path, size) {
     try {
       return await this.dbApi.updateMovie(tmdb, imdb, tvdb, { path: path, size: size })
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async updateEpisodePathAndSize(tmdb, imdb, tvdb, path, size) {
+    try {
+      return await this.dbApi.updateEpisode(tmdb, imdb, tvdb, { path: path, size: size })
     } catch (error) {
       throw error
     }

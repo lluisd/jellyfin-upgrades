@@ -61,7 +61,7 @@ export class MongoApi {
     }
   }
 
-  async updateMovie(tmdb, imdb, tvdb, path, size) {
+  async updateMovie(tmdb, imdb, tvdb, update) {
     const filter = {
       $or: [tmdb ? { tmdb: tmdb } : {}, imdb ? { imdb: imdb } : {}, tvdb ? { tvdb: tvdb } : {}]
     }
@@ -71,9 +71,25 @@ export class MongoApi {
     }
 
     try {
-      return Movie.updateOne(filter, { path: path, size: size })
+      return Movie.updateOne(filter, update)
     } catch (error) {
       throw new Error(`Error updating movie on Mongodb: ${error}`)
+    }
+  }
+
+  updateEpisode(tmdb, imdb, tvdb, update) {
+    const filter = {
+      $or: [tmdb ? { tmdb: tmdb } : {}, imdb ? { imdb: imdb } : {}, tvdb ? { tvdb: tvdb } : {}]
+    }
+
+    if (Object.keys(filter.$or[0]).length === 0 && Object.keys(filter.$or[1]).length === 0) {
+      return null
+    }
+
+    try {
+      return Episode.updateOne(filter, update)
+    } catch (error) {
+      throw new Error(`Error updating episode on Mongodb: ${error}`)
     }
   }
 
