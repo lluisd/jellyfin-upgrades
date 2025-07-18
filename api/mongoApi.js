@@ -23,7 +23,7 @@ export class MongoApi {
 
   async addMovies(movies) {
     try {
-      return Movie.insertMany(movies)
+      return await Movie.insertMany(movies)
     } catch (error) {
       throw new Error(`Error adding movies to Mongodb: ${error}`)
     }
@@ -31,7 +31,7 @@ export class MongoApi {
 
   async addEpisodes(episodes) {
     try {
-      return Episode.insertMany(episodes)
+      return await Episode.insertMany(episodes)
     } catch (error) {
       throw new Error(`Error adding episodes to Mongodb: ${error}`)
     }
@@ -39,7 +39,7 @@ export class MongoApi {
 
   async addOrphans(orphans) {
     try {
-      return Orphan.insertMany(orphans)
+      return await Orphan.insertMany(orphans)
     } catch (error) {
       throw new Error(`Error adding orphans to Mongodb: ${error}`)
     }
@@ -47,7 +47,7 @@ export class MongoApi {
 
   async addMovie(movie) {
     try {
-      return Movie.create(movie)
+      return await Movie.create(movie)
     } catch (error) {
       throw new Error(`Error adding movie to Mongodb: ${error}`)
     }
@@ -55,39 +55,37 @@ export class MongoApi {
 
   async addEpisode(episode) {
     try {
-      return Episode.create(episode)
+      return await Episode.create(episode)
     } catch (error) {
       throw new Error(`Error adding episode to Mongodb: ${error}`)
     }
   }
 
   async updateMovie(tmdb, imdb, tvdb, update) {
-    const filter = {
-      $or: [tmdb ? { tmdb: tmdb } : {}, imdb ? { imdb: imdb } : {}, tvdb ? { tvdb: tvdb } : {}]
-    }
+    const orConditions = []
+    if (tmdb) orConditions.push({ tmdb })
+    if (imdb) orConditions.push({ imdb })
+    if (tvdb) orConditions.push({ tvdb })
 
-    if (Object.keys(filter.$or[0]).length === 0 && Object.keys(filter.$or[1]).length === 0) {
-      return null
-    }
+    if (orConditions.length === 0) return null
 
     try {
-      return Movie.updateOne(filter, update)
+      return await Movie.updateOne({ $or: orConditions }, update)
     } catch (error) {
       throw new Error(`Error updating movie on Mongodb: ${error}`)
     }
   }
 
-  updateEpisode(tmdb, imdb, tvdb, update) {
-    const filter = {
-      $or: [tmdb ? { tmdb: tmdb } : {}, imdb ? { imdb: imdb } : {}, tvdb ? { tvdb: tvdb } : {}]
-    }
+  async updateEpisode(tmdb, imdb, tvdb, update) {
+    const orConditions = []
+    if (tmdb) orConditions.push({ tmdb })
+    if (imdb) orConditions.push({ imdb })
+    if (tvdb) orConditions.push({ tvdb })
 
-    if (Object.keys(filter.$or[0]).length === 0 && Object.keys(filter.$or[1]).length === 0) {
-      return null
-    }
+    if (orConditions.length === 0) return null
 
     try {
-      return Episode.updateOne(filter, update)
+      return await Episode.updateOne({ $or: orConditions }, update)
     } catch (error) {
       throw new Error(`Error updating episode on Mongodb: ${error}`)
     }
@@ -95,39 +93,37 @@ export class MongoApi {
 
   async getMovieByJellyfinId(jellyfinId) {
     try {
-      return Movie.findOne({ jellyfinId: jellyfinId }).lean()
+      return await Movie.findOne({ jellyfinId: jellyfinId }).lean()
     } catch (error) {
       throw new Error(`Error getting movie from Mongodb: ${error}`)
     }
   }
 
   async getMovie(tmdb, imdb, tvdb) {
-    const filter = {
-      $or: [tmdb ? { tmdb: tmdb } : {}, imdb ? { imdb: imdb } : {}, tvdb ? { tvdb: tvdb } : {}]
-    }
+    const orConditions = []
+    if (tmdb) orConditions.push({ tmdb })
+    if (imdb) orConditions.push({ imdb })
+    if (tvdb) orConditions.push({ tvdb })
 
-    if (Object.keys(filter.$or[0]).length === 0 && Object.keys(filter.$or[1]).length === 0) {
-      return null
-    }
+    if (orConditions.length === 0) return null
 
     try {
-      return Movie.findOne(filter).lean()
+      return await Movie.findOne({ $or: orConditions }).lean()
     } catch (error) {
       throw new Error(`Error getting movie from Mongodb: ${error}`)
     }
   }
 
   async getEpisode(tmdb, imdb, tvdb) {
-    const filter = {
-      $or: [tmdb ? { tmdb: tmdb } : {}, imdb ? { imdb: imdb } : {}, tvdb ? { tvdb: tvdb } : {}]
-    }
+    const orConditions = []
+    if (tmdb) orConditions.push({ tmdb })
+    if (imdb) orConditions.push({ imdb })
+    if (tvdb) orConditions.push({ tvdb })
 
-    if (Object.keys(filter.$or[0]).length === 0 && Object.keys(filter.$or[1]).length === 0) {
-      return null
-    }
+    if (orConditions.length === 0) return null
 
     try {
-      return Episode.findOne(filter).lean()
+      return await Episode.findOne({ $or: orConditions }).lean()
     } catch (error) {
       throw new Error(`Error getting episode from Mongodb: ${error}`)
     }
@@ -135,7 +131,7 @@ export class MongoApi {
 
   async clearMovies() {
     try {
-      return Movie.deleteMany()
+      return await Movie.deleteMany()
     } catch (error) {
       throw new Error(`Error clearing movies from Mongodb: ${error}`)
     }
@@ -143,7 +139,7 @@ export class MongoApi {
 
   async clearEpisodes() {
     try {
-      return Episode.deleteMany()
+      return await Episode.deleteMany()
     } catch (error) {
       throw new Error(`Error clearing episodes from Mongodb: ${error}`)
     }
@@ -151,7 +147,7 @@ export class MongoApi {
 
   async clearOrphans(isMovie) {
     try {
-      return Orphan.deleteMany({ isMovie: !!isMovie })
+      return await Orphan.deleteMany({ isMovie: !!isMovie })
     } catch (error) {
       throw new Error(`Error clearing orphan ${isMovie ? 'movies' : 'series'} from Mongodb: ${error}`)
     }
@@ -159,7 +155,7 @@ export class MongoApi {
 
   async deleteMovie(jellyfinId) {
     try {
-      return Movie.deleteOne({ jellyfinId: jellyfinId })
+      return await Movie.deleteOne({ jellyfinId: jellyfinId })
     } catch (error) {
       throw new Error(`Error deleting movie from Mongodb: ${error}`)
     }

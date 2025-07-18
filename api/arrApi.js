@@ -1,6 +1,6 @@
 async function getNamingConfig(config) {
   console.log(`Calling /api/v3/config/naming`)
-  const endpoint = `${config.radarr.url}/api/v3/config/naming`
+  const endpoint = `${config.url}/api/v3/config/naming`
   const options = {
     headers: _getHeaders(config),
     method: 'GET'
@@ -21,7 +21,7 @@ function _getHeaders(config) {
   return {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    'x-api-key': config.radarr.apiKey
+    'x-api-key': config.apiKey
   }
 }
 
