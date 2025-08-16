@@ -65,7 +65,7 @@ class MoviesController {
           const canDeleteResponse = await torrentService.canDeleteFromTorrentClient(
             name,
             extension,
-            config.radarr.url ? radarrNamingService.applyRenaming : null
+            config.radarr.url ? radarrService.applyRenaming : null
           )
           torrentExists = canDeleteResponse.torrentExists
           tracker = canDeleteResponse.tracker
@@ -73,7 +73,7 @@ class MoviesController {
           const deleteResponse = await torrentService.deleteFromTorrentClient(
             name,
             extension,
-            config.radarr.url ? radarrNamingService.applyRenaming : null
+            config.radarr.url ? radarrService.applyRenaming : null
           )
           deleted = deleteResponse.deleted
           reason = deleteResponse.reason
