@@ -36,7 +36,6 @@ async function getLibrariesIds() {
 async function getMovies(hasLimit = false) {
   try {
     const options = {
-      isMovie: true,
       parentId: config.jellyfin.moviesLibraryId,
       includeItemTypes: ['Movie'],
       fields: [
@@ -65,7 +64,6 @@ async function getMovies(hasLimit = false) {
 async function getMoviesWithMediaStreams() {
   try {
     const options = {
-      isMovie: true,
       parentId: config.jellyfin.moviesLibraryId,
       includeItemTypes: ['Movie'],
       fields: [ItemFields.MediaStreams]
@@ -81,7 +79,6 @@ async function getMoviesWithMediaStreams() {
 async function getTVShows() {
   try {
     const options = {
-      IsSeries: true,
       includeItemTypes: ['Series'],
       parentId: config.jellyfin.seriesLibraryId
     }
@@ -130,7 +127,6 @@ async function getMovie(id) {
   try {
     const result = await getItemsApi(api).getItems({
       ids: [id],
-      //isMovie: true,
       includeItemTypes: ['Movie'],
       parentId: config.jellyfin.moviesLibraryId,
       fields: [
