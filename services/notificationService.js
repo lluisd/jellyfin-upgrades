@@ -281,13 +281,15 @@ class NotificationService {
   _mapReason(intent) {
     switch (intent.reason) {
       case MovieStatus.DOWNLOAD_NOT_COMPLETED:
-        return '🔻'
+        return '⬇️'
       case MovieStatus.NO_SEEDING:
         return '⏸️'
       case MovieStatus.INCOMPLETE_SEED_TIME:
         return '⏳'
+      case MovieStatus.QUEUED:
+        return '🔄'
       default:
-        return ''
+        return intent.reason
     }
   }
 }
