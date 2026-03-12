@@ -49,7 +49,7 @@ class FilesController {
           const queuedRecord = queuedRecords.find((item) => item.title.toLowerCase().includes(filename.toLowerCase()))
           if (queuedRecord) {
             deleted = false
-            torrentResult.reason = MovieStatus.QUEUED.replace('{arr}', isMovie ? 'Radarr' : 'Sonarr')
+            torrentResult.reason = MovieStatus.QUEUED
           }
         } else if (isMovie && hasOneParentFolder(filename)) {
           const folderName = getParentFolder(filename)

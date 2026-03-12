@@ -10,7 +10,7 @@ export const MovieStatus = {
   NO_SEEDING: 'no seedeando',
   INCOMPLETE_SEED_TIME: 'tiempo de seed incompleto',
   DELETED: 'borrado',
-  QUEUED: 'en cola de {arr}'
+  QUEUED: 'en cola de arr'
 }
 
 class TorrentService {
