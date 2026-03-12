@@ -1,10 +1,11 @@
 import arrApi from '../api/arrApi.js'
+import ArrService from './arrService.js'
 
-class ArrNamingService {
+class ArrNamingService extends ArrService {
   namingConfig = {}
 
   constructor(config) {
-    this.config = config
+    super(config)
   }
 
   async loadNamingConfig() {

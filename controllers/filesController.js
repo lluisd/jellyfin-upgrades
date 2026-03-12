@@ -1,11 +1,12 @@
 import storageService from '../services/storageService.js'
-import torrentService from '../services/torrentService.js'
+import torrentService, { MovieStatus } from '../services/torrentService.js'
 import { getFilenameAndExtension, getParentFolder, hasOneParentFolder, isDirectFileName } from '../utils/files.js'
 import semaphore from '../semaphore.js'
 import notificationService from '../services/notificationService.js'
 import { config } from '../config.js'
 import dataService from '../services/dataService.js'
 import orphan from '../models/orphan.js'
+import radarrService from '../services/radarrService.js'
 
 class FilesController {
   async removeMovieTorrents(notifyOnly = false) {
@@ -22,7 +23,15 @@ class FilesController {
       console.log('removing orphan torrents')
       const files = await storageService.getFilesWithoutHardlinks(rootFolder)
 
+      let queuedRecords = []
+      if (isMovie && config.radarr.url) {
+        queuedRecords = await radarrService.getQueue()
+      } else if (!isMovie && config.sonarr.url) {
+        queuedRecords = await sonarrService.getQueue()
+      }
+
       let intents = []
+
       for (const filename of files) {
         const { name, extension } = getFilenameAndExtension(filename)
         let deleted = false
@@ -36,6 +45,11 @@ class FilesController {
             if (!torrentResult.torrentExists) {
               deleted = await storageService.removeFile(filename, rootFolder)
             }
+          }
+          const queuedRecord = queuedRecords.find((item) => item.title.toLowerCase().includes(filename.toLowerCase()))
+          if (queuedRecord) {
+            deleted = false
+            torrentResult.reason = MovieStatus.QUEUED.replace('{arr}', isMovie ? 'Radarr' : 'Sonarr')
           }
         } else if (isMovie && hasOneParentFolder(filename)) {
           const folderName = getParentFolder(filename)
