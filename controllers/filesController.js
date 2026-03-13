@@ -46,7 +46,7 @@ class FilesController {
               deleted = await storageService.removeFile(filename, rootFolder)
             }
           }
-          const queuedRecord = queuedRecords.find((item) => item.title.toLowerCase().includes(filename.toLowerCase()))
+          const queuedRecord = queuedRecords.find((item) => item.title.toLowerCase().includes(name.toLowerCase()))
           if (queuedRecord) {
             deleted = false
             torrentResult.reason = MovieStatus.QUEUED
@@ -77,6 +77,7 @@ class FilesController {
           tracker: torrentResult?.tracker
         })
       }
+
       console.log(intents.length + ' torrents without hardlinks')
       await notificationService.notifyTorrentsWithoutHardlinks(intents, isMovie, notifyOnly)
       return files
