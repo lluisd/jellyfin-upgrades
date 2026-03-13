@@ -5,8 +5,8 @@ import semaphore from '../semaphore.js'
 import notificationService from '../services/notificationService.js'
 import { config } from '../config.js'
 import dataService from '../services/dataService.js'
-import orphan from '../models/orphan.js'
 import radarrService from '../services/radarrService.js'
+import sonarrService from '../services/sonarrService.js'
 
 class FilesController {
   async removeMovieTorrents(notifyOnly = false) {

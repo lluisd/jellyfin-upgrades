@@ -11,8 +11,8 @@ class ArrService {
     return queue.records.map((item) => ({
       title: item.title,
       status: item.status,
+      state: item.trackedDownloadState,
       isDownloading: item.trackedDownloadState === 'downloading',
-      errorMessage: item.errorMessage,
       added: item.added
     }))
   }
