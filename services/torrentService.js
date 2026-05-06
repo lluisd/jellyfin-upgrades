@@ -3,7 +3,7 @@ import { QBittorrentApi } from '../api/qBittorrentApi.js'
 import moment from 'moment'
 import { config } from '../config.js'
 
-export const MovieStatus = {
+export const TorrentStatus = {
   DEFAULT: '',
   NO_EXISTS: 'no existe',
   DOWNLOAD_NOT_COMPLETED: 'descarga incompleta',
@@ -47,17 +47,17 @@ class TorrentService {
   async canDeleteFromTorrentClient(name, extension = '', applyRenamingFn = null) {
     try {
       let canDelete = true
-      let reason = MovieStatus.DEFAULT
+      let reason = TorrentStatus.DEFAULT
       const torrent = await this.clienApi.getTorrent(name, extension, applyRenamingFn)
       if (torrent) {
         const minSeconds = this._getMinSeedTime(torrent.tracker)
         if (!torrent.isCompleted) {
           canDelete = false
-          reason = MovieStatus.DOWNLOAD_NOT_COMPLETED
+          reason = TorrentStatus.DOWNLOAD_NOT_COMPLETED
         }
         if (!torrent.isSeeding) {
           canDelete = false
-          reason = MovieStatus.NO_SEEDING
+          reason = TorrentStatus.NO_SEEDING
         }
 
         if (torrent.secondsSeeding < minSeconds) {
@@ -70,17 +70,17 @@ class TorrentService {
                 torrent.startDate === 0 ||
                 !moment.unix(torrent.startDate).isBefore(moment().subtract(minSeconds, 'seconds'))
               ) {
-                reason = MovieStatus.INCOMPLETE_SEED_TIME
+                reason = TorrentStatus.INCOMPLETE_SEED_TIME
                 canDelete = false
               }
             }
           } else {
-            reason = MovieStatus.INCOMPLETE_SEED_TIME
+            reason = TorrentStatus.INCOMPLETE_SEED_TIME
             canDelete = false
           }
         }
       } else {
-        reason = MovieStatus.NO_EXISTS
+        reason = TorrentStatus.NO_EXISTS
       }
       return {
         canDelete,
@@ -99,7 +99,7 @@ class TorrentService {
       const response = await this.canDeleteFromTorrentClient(name, extension, applyRenamingFn)
 
       if (response.torrent && response.canDelete) {
-        response.reason = MovieStatus.DELETED
+        response.reason = TorrentStatus.DELETED
         await this.clienApi.deleteTorrent(response.torrent.id)
       }
       return {

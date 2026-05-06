@@ -1,6 +1,6 @@
 import storageService from '../services/storageService.js'
-import torrentService, { MovieStatus } from '../services/torrentService.js'
-import { getFilenameAndExtension, getParentFolder, hasOneParentFolder, isDirectFileName } from '../utils/files.js'
+import torrentService, { TorrentStatus } from '../services/torrentService.js'
+import { getFilenameAndExtension, getRootFolder, isDirectFileName } from '../utils/files.js'
 import semaphore from '../semaphore.js'
 import notificationService from '../services/notificationService.js'
 import { config } from '../config.js'
@@ -32,43 +32,40 @@ class FilesController {
 
       let intents = []
 
-      for (const filename of files) {
-        const { name, extension } = getFilenameAndExtension(filename)
+      const directFiles = files.filter((f) => isDirectFileName(f))
+      const nestedFiles = files.filter((f) => !isDirectFileName(f))
+      const rootFolders = [...new Set(nestedFiles.map((f) => getRootFolder(f)))]
+
+      const items = [
+        ...directFiles.map((f) => {
+          const { name, extension } = getFilenameAndExtension(f)
+          return { filename: f, name, extension, isFolder: false }
+        }),
+        ...rootFolders.map((f) => ({ filename: f, name: f, extension: '', isFolder: true }))
+      ]
+
+      for (const { filename, name, extension, isFolder } of items) {
         let deleted = false
         let torrentResult = {}
-        if (isDirectFileName(filename)) {
-          if (notifyOnly) {
-            torrentResult = await torrentService.canDeleteFromTorrentClient(name, extension)
-          } else {
-            torrentResult = await torrentService.deleteFromTorrentClient(name, extension)
-            deleted = torrentResult.deleted
-            if (!torrentResult.torrentExists) {
-              deleted = await storageService.removeFile(filename, rootFolder)
-            }
-          }
-          const queuedRecord = queuedRecords.find((item) => item.title.toLowerCase().includes(name.toLowerCase()))
-          if (queuedRecord) {
-            deleted = false
-            torrentResult.reason = MovieStatus.QUEUED
-          }
-        } else if (isMovie && hasOneParentFolder(filename)) {
-          const folderName = getParentFolder(filename)
-          if (notifyOnly) {
-            torrentResult = await torrentService.canDeleteFromTorrentClient(folderName, extension)
-          } else {
-            torrentResult = await torrentService.deleteFromTorrentClient(folderName)
-            deleted = torrentResult.deleted
-            if (!torrentResult.torrentExists) {
-              deleted = await storageService.removeFolder(folderName, rootFolder)
-            }
-          }
+
+        if (notifyOnly) {
+          torrentResult = await torrentService.canDeleteFromTorrentClient(name, extension)
         } else {
-          const folderName = getParentFolder(filename)
-          torrentResult = await torrentService.canDeleteFromTorrentClient(folderName)
-          if (!notifyOnly && torrentResult.canDelete) {
-            deleted = await storageService.removeFolder(folderName, rootFolder)
+          torrentResult = await torrentService.deleteFromTorrentClient(name, extension)
+          deleted = torrentResult.deleted
+          if (!torrentResult.torrentExists) {
+            deleted = isFolder
+              ? await storageService.removeFolder(name, rootFolder)
+              : await storageService.removeFile(filename, rootFolder)
           }
         }
+
+        const queuedRecord = queuedRecords.find((item) => item.title.toLowerCase().includes(name.toLowerCase()))
+        if (queuedRecord) {
+          deleted = false
+          torrentResult.reason = TorrentStatus.QUEUED
+        }
+
         intents.push({
           filename,
           deleted,

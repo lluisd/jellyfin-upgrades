@@ -2,7 +2,7 @@ import TelegramApi from '../api/telegramApi.js'
 import moment from 'moment'
 import 'moment/locale/es.js'
 import { formatBytes } from '../utils/files.js'
-import { MovieStatus } from './torrentService.js'
+import { TorrentStatus } from './torrentService.js'
 moment.locale('es')
 
 class NotificationService {
@@ -280,13 +280,13 @@ class NotificationService {
 
   _mapReason(intent) {
     switch (intent.reason) {
-      case MovieStatus.DOWNLOAD_NOT_COMPLETED:
+      case TorrentStatus.DOWNLOAD_NOT_COMPLETED:
         return '⬇️'
-      case MovieStatus.NO_SEEDING:
+      case TorrentStatus.NO_SEEDING:
         return '⏸️'
-      case MovieStatus.INCOMPLETE_SEED_TIME:
+      case TorrentStatus.INCOMPLETE_SEED_TIME:
         return '⏳'
-      case MovieStatus.QUEUED:
+      case TorrentStatus.QUEUED:
         return '🔄'
       default:
         return intent.reason

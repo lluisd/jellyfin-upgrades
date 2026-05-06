@@ -1,5 +1,5 @@
 import storageService from '../services/storageService.js'
-import torrentService, { MovieStatus } from '../services/torrentService.js'
+import torrentService, { TorrentStatus } from '../services/torrentService.js'
 import mediaService from '../services/mediaService.js'
 import dataService from '../services/dataService.js'
 import notificationService from '../services/notificationService.js'
@@ -58,7 +58,7 @@ class MoviesController {
 
         if (config.radarr.url) await radarrService.loadNamingConfig()
         let deleted = false
-        let reason = MovieStatus.DEFAULT
+        let reason = TorrentStatus.DEFAULT
         let torrentExists
         let tracker
         if (notifyOnly) {

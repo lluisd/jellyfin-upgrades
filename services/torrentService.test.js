@@ -27,7 +27,7 @@ jest.unstable_mockModule('../api/qBittorrentApi.js', () => ({
   }))
 }))
 
-const { default: torrentService, MovieStatus } = await import('./torrentService.js')
+const { default: torrentService, TorrentStatus } = await import('./torrentService.js')
 
 describe('TorrentService', () => {
   beforeEach(() => {
@@ -64,7 +64,7 @@ describe('TorrentService', () => {
 
       expect(result).toEqual({
         canDelete: true,
-        reason: MovieStatus.DEFAULT,
+        reason: TorrentStatus.DEFAULT,
         tracker: 'example',
         torrentExists: true,
         torrent: expect.any(Object)
@@ -78,7 +78,7 @@ describe('TorrentService', () => {
 
       expect(result).toEqual({
         canDelete: true,
-        reason: MovieStatus.NO_EXISTS,
+        reason: TorrentStatus.NO_EXISTS,
         tracker: '',
         torrentExists: false,
         torrent: undefined
@@ -86,8 +86,8 @@ describe('TorrentService', () => {
     })
 
     it.each([
-      [432000, true, MovieStatus.DEFAULT],
-      [431999, false, MovieStatus.INCOMPLETE_SEED_TIME]
+      [432000, true, TorrentStatus.DEFAULT],
+      [431999, false, TorrentStatus.INCOMPLETE_SEED_TIME]
     ])(
       'checks default min seeding time of 5 days when tracker is unknown',
       async (secondsSeeding, canDelete, reason) => {
@@ -106,12 +106,12 @@ describe('TorrentService', () => {
     )
 
     it.each([
-      [false, false, 504800, false, MovieStatus.INCOMPLETE_SEED_TIME],
-      [true, false, 504800, false, MovieStatus.INCOMPLETE_SEED_TIME],
-      [true, true, 504800, false, MovieStatus.INCOMPLETE_SEED_TIME],
-      [false, true, 604800, false, MovieStatus.DOWNLOAD_NOT_COMPLETED],
-      [true, false, 604800, false, MovieStatus.NO_SEEDING],
-      [false, false, 604800, false, MovieStatus.NO_SEEDING]
+      [false, false, 504800, false, TorrentStatus.INCOMPLETE_SEED_TIME],
+      [true, false, 504800, false, TorrentStatus.INCOMPLETE_SEED_TIME],
+      [true, true, 504800, false, TorrentStatus.INCOMPLETE_SEED_TIME],
+      [false, true, 604800, false, TorrentStatus.DOWNLOAD_NOT_COMPLETED],
+      [true, false, 604800, false, TorrentStatus.NO_SEEDING],
+      [false, false, 604800, false, TorrentStatus.NO_SEEDING]
     ])(
       'returns false when isCompleted=%s, isSeeding=%s and secondsSeeding=%d ',
       async (isCompleted, isSeeding, secondsSeeding, canDelete, reason) => {
@@ -131,13 +131,13 @@ describe('TorrentService', () => {
     )
 
     it.each([
-      [0, 0, false, MovieStatus.INCOMPLETE_SEED_TIME],
-      [2, 3, false, MovieStatus.INCOMPLETE_SEED_TIME],
-      [8, 2, true, MovieStatus.DEFAULT],
-      [8, 0, true, MovieStatus.DEFAULT],
-      [2, 8, true, MovieStatus.DEFAULT],
-      [0, 8, true, MovieStatus.DEFAULT],
-      [8, 8, true, MovieStatus.DEFAULT]
+      [0, 0, false, TorrentStatus.INCOMPLETE_SEED_TIME],
+      [2, 3, false, TorrentStatus.INCOMPLETE_SEED_TIME],
+      [8, 2, true, TorrentStatus.DEFAULT],
+      [8, 0, true, TorrentStatus.DEFAULT],
+      [2, 8, true, TorrentStatus.DEFAULT],
+      [0, 8, true, TorrentStatus.DEFAULT],
+      [8, 8, true, TorrentStatus.DEFAULT]
     ])(
       'on seeding can be restarted returns false if torrent if has incomplete seeding time but completed %i days ago and started %i days ago',
       async (daysCompleted, daysStarted, canDelete, reason) => {
@@ -181,7 +181,7 @@ describe('TorrentService', () => {
         tracker: 'example',
         torrentExists: true,
         deleted: true,
-        reason: MovieStatus.DELETED
+        reason: TorrentStatus.DELETED
       })
       expect(deleteTorrentMock).toHaveBeenCalledTimes(1)
     })
@@ -197,7 +197,7 @@ describe('TorrentService', () => {
       const result = await torrentService.deleteFromTorrentClient('movie', '.mkv')
 
       expect(result.deleted).toBe(false)
-      expect(result.reason).toBe(MovieStatus.INCOMPLETE_SEED_TIME)
+      expect(result.reason).toBe(TorrentStatus.INCOMPLETE_SEED_TIME)
       expect(deleteTorrentMock).not.toHaveBeenCalled()
     })
 

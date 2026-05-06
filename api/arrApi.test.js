@@ -14,10 +14,8 @@ global.fetch = jest.fn()
 const { default: arrApi } = await import('./arrApi.js')
 
 const config = {
-  radarr: {
-    url: 'http://mock-arr-url',
-    apiKey: 'mock-api-key'
-  }
+  url: 'http://mock-arr-url',
+  apiKey: 'mock-api-key'
 }
 
 describe('arrApi', () => {

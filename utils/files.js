@@ -27,6 +27,10 @@ export function getParentFolder(filePath) {
   return path.basename(path.dirname(filePath))
 }
 
+export function getRootFolder(filePath) {
+  return filePath.split(path.sep)[0]
+}
+
 export function formatBytes(bytes, decimals = 2) {
   if (!+bytes) return '0 Bytes'
 
