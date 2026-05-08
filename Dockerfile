@@ -3,11 +3,12 @@ FROM node:24-alpine
 RUN apk upgrade --no-cache
 
 RUN apk add --no-cache \
-    bash
+    bash \
+    python3 \
+    make \
+    g++
 
 ENV NODE_ENV production
-
-WORKDIR /usr/src/app
 
 WORKDIR /usr/src/app
 
