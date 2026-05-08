@@ -1,4 +1,4 @@
-FROM node:23-alpine
+FROM node:24-alpine
 
 RUN apk upgrade --no-cache
 
@@ -9,9 +9,13 @@ ENV NODE_ENV production
 
 WORKDIR /usr/src/app
 
-COPY . .
+WORKDIR /usr/src/app
 
-RUN npm install
+COPY package*.json ./
+
+RUN npm ci
+
+COPY . .
 
 ENV DB_DIR=/usr/src/app/data
 RUN mkdir -p $DB_DIR && chown -R node:node $DB_DIR
