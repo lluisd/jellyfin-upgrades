@@ -9,6 +9,13 @@ export const config = {
     mongo: {
       dbName: process.env.MONGODB_NAME,
       uri: process.env.MONGODB_URI
+    },
+    postgres: {
+      host: process.env.POSTGRES_HOST || 'localhost',
+      port: parseInt(process.env.POSTGRES_PORT || '5432'),
+      dbName: process.env.POSTGRES_DB,
+      user: process.env.POSTGRES_USER,
+      password: process.env.POSTGRES_PASSWORD
     }
   },
   jellyfin: {
