@@ -1,22 +1,14 @@
-import { MongoApi } from '../api/mongoApi.js'
-import { config } from '../config.js'
-import { SQLiteApi } from '../api/sqliteApi.js'
-import { PostgresApi } from '../api/postgresApi.js'
+import { KnexApi } from '../api/knexApi.js'
 
 class DataService {
   dbApi = null
 
   constructor() {
-    const client = config.database.type
-    if (client === 'mongodb') {
-      this.dbApi = new MongoApi()
-    } else if (client === 'sqlite') {
-      this.dbApi = new SQLiteApi()
-    } else if (client === 'postgres') {
-      this.dbApi = new PostgresApi()
-    } else {
-      throw new Error(`Unsupported db client: ${client}`)
-    }
+    this.dbApi = new KnexApi()
+  }
+
+  async init() {
+    await this.dbApi.init()
   }
 
   async clearMovies() {
