@@ -1,6 +1,7 @@
 import { MongoApi } from '../api/mongoApi.js'
 import { config } from '../config.js'
 import { SQLiteApi } from '../api/sqliteApi.js'
+import { PostgresApi } from '../api/postgresApi.js'
 
 class DataService {
   dbApi = null
@@ -11,6 +12,8 @@ class DataService {
       this.dbApi = new MongoApi()
     } else if (client === 'sqlite') {
       this.dbApi = new SQLiteApi()
+    } else if (client === 'postgres') {
+      this.dbApi = new PostgresApi()
     } else {
       throw new Error(`Unsupported db client: ${client}`)
     }

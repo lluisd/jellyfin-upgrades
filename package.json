@@ -22,6 +22,7 @@
     "mongoose": "^8.23.1",
     "node-cron": "^4.2.1",
     "node-telegram-bot-api": "^0.67.0",
+    "pg": "^8.13.3",
     "transmission-promise": "^1.1.7"
   },
   "devDependencies": {
