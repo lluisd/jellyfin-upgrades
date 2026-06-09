@@ -133,17 +133,26 @@ describe('QBittorrentApi', () => {
         {
           hash: 'mock-hash-1',
           name: 'mock-torrent-1.mp4',
-          state: TorrentState.Error
+          state: TorrentState.Error,
+          has_tracker_error: false
         },
         {
           hash: 'mock-hash-2',
           name: 'mock-torrent-2.mp4',
-          state: TorrentState.MissingFiles
+          state: TorrentState.MissingFiles,
+          has_tracker_error: false
         },
         {
           hash: 'mock-hash-3',
           name: 'mock-torrent-3.mp4',
-          state: TorrentState.ForcedUP
+          state: TorrentState.ForcedUP,
+          has_tracker_error: false
+        },
+        {
+          hash: 'mock-hash-4',
+          name: 'mock-torrent-4.mp4',
+          state: TorrentState.StalledUP,
+          has_tracker_error: true
         }
       ])
 
@@ -160,6 +169,12 @@ describe('QBittorrentApi', () => {
           name: 'mock-torrent-2.mp4',
           error: 1,
           errorString: TorrentState.MissingFiles
+        },
+        {
+          id: 'mock-hash-4',
+          name: 'mock-torrent-4.mp4',
+          error: 1,
+          errorString: 'Tracker error'
         }
       ])
       expect(listTorrentsMock).toHaveBeenCalledWith({ includeTrackers: true })
@@ -170,12 +185,14 @@ describe('QBittorrentApi', () => {
         {
           hash: 'mock-hash-1',
           name: 'mock-torrent-1.mp4',
-          state: TorrentState.ForcedUP
+          state: TorrentState.ForcedUP,
+          has_tracker_error: false
         },
         {
           hash: 'mock-hash-2',
           name: 'mock-torrent-2.mp4',
-          state: TorrentState.Uploading
+          state: TorrentState.Uploading,
+          has_tracker_error: false
         }
       ])
 

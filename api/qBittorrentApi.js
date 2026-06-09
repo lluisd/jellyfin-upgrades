@@ -83,12 +83,16 @@ export class QBittorrentApi {
       })
 
       for (const torrent of torrents) {
-        if (torrent.state === TorrentState.Error || torrent.state === TorrentState.MissingFiles) {
+        if (
+          torrent.state === TorrentState.Error ||
+          torrent.state === TorrentState.MissingFiles ||
+          torrent.has_tracker_error
+        ) {
           const errorDetails = {
             id: torrent.hash,
             name: torrent.name,
-            error: torrent.state === TorrentState.Error ? 2 : 1,
-            errorString: torrent.state
+            error: torrent.has_tracker_error ? 1 : torrent.state === TorrentState.Error ? 2 : 1,
+            errorString: torrent.has_tracker_error ? 'Tracker error' : torrent.state
           }
           torrentsWithErrors.push(errorDetails)
         }
