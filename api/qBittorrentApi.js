@@ -1,5 +1,5 @@
 import { config } from '../config.js'
-import { QBittorrent, TorrentState } from '@ctrl/qbittorrent'
+import { QBittorrent, TorrentState, TorrentTrackerStatus } from '@ctrl/qbittorrent'
 
 export class QBittorrentApi {
   client = null
@@ -55,6 +55,11 @@ export class QBittorrentApi {
     }
   }
 
+  _isTrackerError(tracker) {
+    const trackerState = tracker?.status
+    return trackerState === TorrentTrackerStatus.TrackerError
+  }
+
   async getAllTorrents() {
     try {
       let result = []
@@ -83,16 +88,15 @@ export class QBittorrentApi {
       })
 
       for (const torrent of torrents) {
-        if (
-          torrent.state === TorrentState.Error ||
-          torrent.state === TorrentState.MissingFiles ||
-          torrent.has_tracker_error
-        ) {
+        const firstTracker = torrent.trackers?.[0]
+        const trackerError = this._isTrackerError(firstTracker)
+
+        if (torrent.state === TorrentState.Error || torrent.state === TorrentState.MissingFiles || trackerError) {
           const errorDetails = {
             id: torrent.hash,
             name: torrent.name,
-            error: torrent.has_tracker_error ? 1 : torrent.state === TorrentState.Error ? 2 : 1,
-            errorString: torrent.has_tracker_error ? 'Tracker error' : torrent.state
+            error: torrent.state === TorrentState.Error ? 2 : 1,
+            errorString: trackerError ? (firstTracker?.msg ?? torrent.state) : torrent.state
           }
           torrentsWithErrors.push(errorDetails)
         }
