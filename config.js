@@ -43,7 +43,8 @@ export const config = {
   },
   telegram: {
     token: process.env.TELEGRAM_TOKEN,
-    channelId: process.env.TELEGRAM_CHAT_ID
+    channelId: process.env.TELEGRAM_CHAT_ID,
+    threadId: process.env.TELEGRAM_THREAD_ID
   },
   radarr: {
     url: process.env.RADARR_URL,
