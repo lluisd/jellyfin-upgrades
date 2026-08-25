@@ -29,7 +29,6 @@ export const config = {
     : {},
   torrentClient: {
     notifyOnly: (process.env.TORRENT_CLIENT_NOTIFY_ONLY || 'true').toLowerCase() === 'true',
-    client: process.env.TORRENT_CLIENT,
     host: process.env.TORRENT_CLIENT_HOST,
     port: process.env.TORRENT_CLIENT_PORT,
     username: process.env.TORRENT_CLIENT_USERNAME,

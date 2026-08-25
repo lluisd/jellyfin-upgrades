@@ -9,7 +9,7 @@ It maintains a local database (sqlite or mongodb) with all the movies (not tv sh
 
 - **Preserve Date Added**: Keeps the original date added for upgraded movies in Jellyfin.
 - **Telegram Notifications**: Sends notifications to a Telegram chat when a movie is added or upgraded.
-- **Torrent Client Integration**: Supports Transmission and qBittorrent to remove the previous movie torrent on upgrade if the minimum seeding days are met.
+- **Torrent Client Integration**: Uses qBittorrent to remove the previous movie torrent on upgrade if the minimum seeding days are met.
 
 ## Extra Features
 - **Purges Movies/Episodes without a hardlink**: If some movies are not in the Jellyfin library, they will be removed from torrent client.
@@ -24,7 +24,7 @@ To run this project, you can use Docker. The application is designed to run in a
 - Docker Compose (optional, for easier management of multi-container applications).
 - MongoDB or SQLite for the database (MongoDB is recommended for production use).
 - Jellyfin server running and accessible.
-- A torrent client (Transmission or qBittorrent) configured and running.
+- qBittorrent configured and running.
 - Telegram bot set up for notifications.
 - Radarr server running and accessible (optional, for movie management).
 
@@ -68,17 +68,16 @@ Configure the Telegram bot to send notifications. You need to create a bot using
 
 ### Torrent Client Configuration:
 
-Configure the torrent client to manage movie and series torrents. You can use either Transmission or qBittorrent.
+Configure qBittorrent to manage movie and series torrents.
 
 | Variable Name                           | Required | Default Value | Description                                                         |
 |-----------------------------------------|----------|---------------|---------------------------------------------------------------------|
-| `TORRENT_CLIENT`                        | Yes      | —             | Torrent client to use (`transmission` or `qbittorrent`).            |
 | `TORRENT_CLIENT_HOST`                   | Yes      | —             | Hostname or IP address of the torrent client.                       |
 | `TORRENT_CLIENT_PORT`                   | Yes      | —             | Port number for the torrent client.                                 |
 | `TORRENT_CLIENT_USERNAME`               | Yes      | —             | Username for torrent client authentication.                         |
 | `TORRENT_CLIENT_PASSWORD`               | Yes      | —             | Password for torrent client authentication.                         |
-| `TORRENT_CLIENT_MOVIES_COMPLETE_FOLDER` | Yes      | —             | Path to the folder for completed movie torrents.                    |
-| `TORRENT_CLIENT_SERIES_COMPLETE_FOLDER` | Yes      | —             | Path to the folder for completed series torrents.                   |
+| `TORRENT_CLIENT_MOVIES_FOLDER`          | Yes      | —             | Path to the folder for completed movie torrents.                    |
+| `TORRENT_CLIENT_SERIES_FOLDER`          | Yes      | —             | Path to the folder for completed series torrents.                   |
 | `TORRENT_CLIENT_NOTIFY_ONLY`            | No       | `true`        | If `true`, only sends notifications without removing torrents.      |
 
 
@@ -119,15 +118,14 @@ services:
       - MONGODB_NAME=jellyfin
       - MONGODB_URI=mongodb://username:password@host:port
       - TRACKERS=[{"tracker1":3},{"tracker2":2},{"tracker3":5}]
-      - TORRENT_CLIENT=transmission
       - TORRENT_CLIENT_HOST=192.168.0.100
       - TORRENT_CLIENT_PORT=9091
       - TORRENT_CLIENT_USERNAME=admin
       - TORRENT_CLIENT_PASSWORD=password
       - TELEGRAM_TOKEN=123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11
       - TELEGRAM_CHAT_ID=33243324
-      - TRANSMISSION_MOVIES_COMPLETE_FOLDER=/data1/torrents/complete/
-      - TRANSMISSION_SERIES_COMPLETE_FOLDER=/data2/torrents/complete/
+      - TORRENT_CLIENT_MOVIES_FOLDER=/data1/torrents/complete/
+      - TORRENT_CLIENT_SERIES_FOLDER=/data2/torrents/complete/
       - TORRENT_CLIENT_NOTIFY_ONLY=true      
       - RADARR_URL=http://radarr:7878
       - RADARR_API_KEY=ccaa83838abcd822aaaccccc831

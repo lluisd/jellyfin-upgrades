@@ -6,17 +6,9 @@ const deleteTorrentMock = jest.fn()
 
 jest.unstable_mockModule('../config.js', () => ({
   config: {
-    torrentClient: { client: 'transmission' },
+    torrentClient: {},
     trackers: { example: 7 }
   }
-}))
-
-jest.unstable_mockModule('../api/transmissionApi.js', () => ({
-  TransmissionApi: jest.fn().mockImplementation(() => ({
-    getTorrent: getTorrentMock,
-    getTorrentsWithErrors: getTorrentsWithErrorsMock,
-    deleteTorrent: deleteTorrentMock
-  }))
 }))
 
 jest.unstable_mockModule('../api/qBittorrentApi.js', () => ({

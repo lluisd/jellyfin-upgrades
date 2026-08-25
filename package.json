@@ -22,8 +22,7 @@
     "moment": "^2.30.1",
     "node-cron": "^4.2.1",
     "node-telegram-bot-api": "^2.1.0",
-    "pg": "^8.23.0",
-    "transmission-promise": "^1.1.7"
+    "pg": "^8.23.0"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
@@ -35,5 +34,9 @@
   },
   "volta": {
     "node": "24.19.0"
+  },
+  "allowScripts": {
+    "better-sqlite3@11.10.0": true,
+    "unrs-resolver@1.12.2": true
   }
 }

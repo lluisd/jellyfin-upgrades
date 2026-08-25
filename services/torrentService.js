@@ -1,4 +1,3 @@
-import { TransmissionApi } from '../api/transmissionApi.js'
 import { QBittorrentApi } from '../api/qBittorrentApi.js'
 import moment from 'moment'
 import { config } from '../config.js'
@@ -17,14 +16,7 @@ class TorrentService {
   clienApi = null
 
   constructor() {
-    const client = config.torrentClient.client
-    if (client === 'transmission') {
-      this.clienApi = new TransmissionApi()
-    } else if (client === 'qbittorrent') {
-      this.clienApi = new QBittorrentApi()
-    } else {
-      throw new Error(`Unsupported torrent client: ${client}`)
-    }
+    this.clienApi = new QBittorrentApi()
   }
 
   async getTorrentsWithErrors() {
