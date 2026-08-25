@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals'
-import { TorrentState } from '@ctrl/qbittorrent'
+import { TorrentState, TorrentTrackerStatus } from '@ctrl/qbittorrent'
 
 jest.unstable_mockModule('../config.js', () => ({
   config: {
@@ -29,6 +29,9 @@ jest.unstable_mockModule('@ctrl/qbittorrent', () => {
       StalledUP: 'stalledUP',
       Error: 'error',
       MissingFiles: 'missingFiles'
+    },
+    TorrentTrackerStatus: {
+      TrackerError: 5
     }
   }
 })
@@ -144,6 +147,17 @@ describe('QBittorrentApi', () => {
           hash: 'mock-hash-3',
           name: 'mock-torrent-3.mp4',
           state: TorrentState.ForcedUP
+        },
+        {
+          hash: 'mock-hash-4',
+          name: 'mock-torrent-4.mp4',
+          state: TorrentState.StalledUP,
+          trackers: [
+            {
+              status: TorrentTrackerStatus.TrackerError,
+              msg: 'Tracker timeout'
+            }
+          ]
         }
       ])
 
@@ -160,9 +174,41 @@ describe('QBittorrentApi', () => {
           name: 'mock-torrent-2.mp4',
           error: 1,
           errorString: TorrentState.MissingFiles
+        },
+        {
+          id: 'mock-hash-4',
+          name: 'mock-torrent-4.mp4',
+          error: 1,
+          errorString: 'Tracker timeout'
         }
       ])
       expect(listTorrentsMock).toHaveBeenCalledWith({ includeTrackers: true })
+    })
+
+    it('returns tracker error details when torrent state is not an error but the first tracker is', async () => {
+      listTorrentsMock.mockResolvedValue([
+        {
+          hash: 'mock-hash-5',
+          name: 'mock-torrent-5.mp4',
+          state: TorrentState.StalledUP,
+          trackers: [
+            {
+              status: TorrentTrackerStatus.TrackerError,
+              msg: 'Tracker authentication failed'
+            }
+          ]
+        }
+      ])
+
+      const result = await qbApi.getTorrentsWithErrors()
+      expect(result).toEqual([
+        {
+          id: 'mock-hash-5',
+          name: 'mock-torrent-5.mp4',
+          error: 1,
+          errorString: 'Tracker authentication failed'
+        }
+      ])
     })
 
     it('returns an empty array when no torrents have errors', async () => {
