@@ -10,20 +10,29 @@ jest.unstable_mockModule('../config.js', () => ({
 }))
 
 const sendMessageMock = jest.fn()
-jest.unstable_mockModule('node-telegram-bot-api', () => {
-  return {
-    default: jest.fn().mockImplementation(() => ({
+
+jest.unstable_mockModule('node-telegram-bot-api', () => ({
+  Bot: jest.fn().mockImplementation(() => ({
+    api: {
       sendMessage: sendMessageMock
-    }))
-  }
-})
+    }
+  }))
+}))
 
 const { default: telegramApi } = await import('./telegramApi.js')
 
 describe('telegramApi', () => {
+  beforeEach(() => {
+    sendMessageMock.mockClear()
+  })
+
   it('sends a message with correct arguments', async () => {
     await telegramApi.notify('Hello')
-    expect(sendMessageMock).toHaveBeenCalledWith('mock-channel-id', 'Hello', { parse_mode: 'Markdown' })
+    expect(sendMessageMock).toHaveBeenCalledWith({
+      chat_id: 'mock-channel-id',
+      text: 'Hello',
+      parse_mode: 'Markdown'
+    })
   })
 
   it('does not send a message if it exceeds the maximum length', async () => {
