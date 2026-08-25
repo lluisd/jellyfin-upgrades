@@ -6,6 +6,7 @@ import moviesController from './controllers/moviesController.js'
 import filesController from './controllers/filesController.js'
 import tvShowsController from './controllers/tvShowsController.js'
 import configController from './controllers/configController.js'
+import dataService from './services/dataService.js'
 
 console.log('Connected')
 
@@ -202,6 +203,7 @@ app.post('/deletedMovie', async function (req, res, next) {
 const listener = app.listen(process.env.PORT, async () => {
   console.log('Listening on port ', +listener.address().port)
   console.log('Database type: ', config.database.type)
+  await dataService.init()
   await configController.checkJellyfinLibraries()
   await moviesController.refreshMovies()
   await tvShowsController.refreshEpisodes()
