@@ -6,10 +6,6 @@ export const config = {
       dbName: process.env.SQLITE_DB_NAME || 'jellyfin-upgrades',
       dbDir: process.env.DB_DIR || './data'
     },
-    mongo: {
-      dbName: process.env.MONGODB_NAME,
-      uri: process.env.MONGODB_URI
-    },
     postgres: {
       host: process.env.POSTGRES_HOST || 'localhost',
       port: parseInt(process.env.POSTGRES_PORT || '5432'),
