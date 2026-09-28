@@ -80,7 +80,8 @@ async function getTVShows() {
   try {
     const options = {
       includeItemTypes: ['Series'],
-      parentId: config.jellyfin.seriesLibraryId
+      parentId: config.jellyfin.seriesLibraryId,
+      fields: [ItemFields.ProviderIds]
     }
 
     const result = await getItemsApi(api).getItems(options)

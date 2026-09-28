@@ -113,6 +113,32 @@ app.get('/avc10bitsEpisodes', async function (req, res, next) {
   }
 })
 
+app.get('/moviesNotInRadarr', async function (req, res, next) {
+  try {
+    const movies = await moviesController.notifyMoviesNotInRadarr()
+    const response = {
+      message: movies,
+      status: 'success'
+    }
+    res.json(response)
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.get('/episodesNotInSonarr', async function (req, res, next) {
+  try {
+    const episodes = await tvShowsController.notifyEpisodesNotInSonarr()
+    const response = {
+      message: episodes,
+      status: 'success'
+    }
+    res.json(response)
+  } catch (error) {
+    next(error)
+  }
+})
+
 app.get('/health', function (req, res) {
   res.json({ status: 'UP' })
 })
@@ -236,4 +262,12 @@ cron.schedule('20 5 * * *', async () => {
 
 cron.schedule('40 5 * * *', async () => {
   await tvShowsController.notifyAVCEpisodesWith10bits()
+})
+
+cron.schedule('50 5 * * *', async () => {
+  await moviesController.notifyMoviesNotInRadarr()
+})
+
+cron.schedule('55 5 * * *', async () => {
+  await tvShowsController.notifyEpisodesNotInSonarr()
 })

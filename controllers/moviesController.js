@@ -130,6 +130,37 @@ class MoviesController {
     }
   }
 
+  async notifyMoviesNotInRadarr() {
+    const [value, release] = await semaphore.acquire()
+    try {
+      if (!config.radarr.url) {
+        console.log('Radarr not configured, skipping Radarr tracking check')
+        return []
+      }
+
+      console.log('Checking movies not properly tracked by Radarr')
+      const jellyfinMovies = await mediaService.getMovies()
+      const radarrMovies = await radarrService.getMovies()
+
+      const untrackedMovies = jellyfinMovies.filter((movie) => {
+        const tmdb = movie?.ProviderIds?.Tmdb
+        const imdb = movie?.ProviderIds?.Imdb
+        const radarrMovie = radarrMovies.find(
+          (rMovie) => (tmdb && rMovie.tmdbId?.toString() === tmdb) || (imdb && rMovie.imdbId === imdb)
+        )
+        return !radarrMovie || !radarrMovie.hasFile
+      })
+
+      console.log(untrackedMovies.length + ' movies not properly tracked by Radarr')
+      await notificationService.notifyMoviesNotInRadarr(untrackedMovies)
+      return untrackedMovies
+    } catch (error) {
+      throw error
+    } finally {
+      release()
+    }
+  }
+
   async deleteMovie(id, tmdb, imdb, jellyfinName) {
     const [value, release] = await semaphore.acquire()
     try {

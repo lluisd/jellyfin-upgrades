@@ -186,6 +186,58 @@ class NotificationService {
     }
   }
 
+  async notifyMoviesNotInRadarr(movies) {
+    try {
+      let results = []
+      if (movies.length > 10) {
+        results = movies.slice(0, 20).map(this._mapMovie.bind(this))
+        results.push('...')
+      } else {
+        results = movies.map(this._mapMovie.bind(this))
+      }
+
+      const message = '*' + movies.length + ' películas no controladas por Radarr*.\n' + results.join('\n')
+      console.log(message)
+      await TelegramApi.notify(message)
+    } catch (error) {
+      throw error
+    }
+  }
+
+  async notifyEpisodesNotInSonarr(episodes) {
+    try {
+      const seriesMap = new Map()
+      for (const episode of episodes) {
+        const key = episode.SeriesId ?? episode.SeriesName
+        if (!seriesMap.has(key)) {
+          seriesMap.set(key, { name: episode.SeriesName, count: 0, seriesNotInSonarr: !!episode.SeriesNotInSonarr })
+        }
+        seriesMap.get(key).count++
+      }
+
+      const series = [...seriesMap.values()].sort((a, b) => b.count - a.count)
+      let results = []
+      if (series.length > 10) {
+        results = series.slice(0, 20).map(this._mapUntrackedSeries.bind(this))
+        results.push('...')
+      } else {
+        results = series.map(this._mapUntrackedSeries.bind(this))
+      }
+
+      const message =
+        '*' +
+        episodes.length +
+        ' episodios de ' +
+        series.length +
+        ' series no controlados por Sonarr*.\n' +
+        results.join('\n')
+      console.log(message)
+      await TelegramApi.notify(message)
+    } catch (error) {
+      throw error
+    }
+  }
+
   async notifyAVC10bitsMovies(movies) {
     try {
       let results = []
@@ -261,6 +313,10 @@ class NotificationService {
 
   _mapEpisode(episode, index) {
     return `*${index + 1}.* \`${episode.Name}\``
+  }
+
+  _mapUntrackedSeries(series, index) {
+    return `*${index + 1}.* \`${series.name}\` (${series.count} episodios)${series.seriesNotInSonarr ? ' ❌ serie no está en Sonarr' : ''}`
   }
 
   _mapError(errorType) {

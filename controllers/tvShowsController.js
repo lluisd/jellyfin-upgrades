@@ -2,7 +2,9 @@ import mediaService from '../services/mediaService.js'
 import notificationService from '../services/notificationService.js'
 import semaphore from '../semaphore.js'
 import dataService from '../services/dataService.js'
+import sonarrService from '../services/sonarrService.js'
 import { getFilenameAndExtension } from '../utils/files.js'
+import { config } from '../config.js'
 
 class TvShowsController {
   async refreshEpisodes() {
@@ -48,6 +50,53 @@ class TvShowsController {
       }
       console.log(totalEpisodes.length + ' episodes with AVC 10-bits')
       return totalEpisodes
+    } catch (error) {
+      throw error
+    } finally {
+      release()
+    }
+  }
+
+  async notifyEpisodesNotInSonarr() {
+    const [value, release] = await semaphore.acquire()
+    try {
+      if (!config.sonarr.url) {
+        console.log('Sonarr not configured, skipping Sonarr tracking check')
+        return []
+      }
+
+      console.log('Checking episodes not properly tracked by Sonarr')
+      const tvShows = await mediaService.getTVShows()
+      const sonarrSeries = await sonarrService.getSeries()
+      const untrackedEpisodes = []
+
+      for (const series of tvShows) {
+        const episodes = await mediaService.getEpisodes(series.Id)
+        const tvdb = series?.ProviderIds?.Tvdb
+        const imdb = series?.ProviderIds?.Imdb
+        const sonarrShow = sonarrSeries.find(
+          (sSeries) => (tvdb && String(sSeries.tvdbId) === String(tvdb)) || (imdb && sSeries.imdbId === imdb)
+        )
+
+        if (!sonarrShow) {
+          untrackedEpisodes.push(...episodes.map((episode) => ({ ...episode, SeriesNotInSonarr: true })))
+          continue
+        }
+
+        const sonarrEpisodes = await sonarrService.getEpisodes(sonarrShow.id)
+        const untrackedSeriesEpisodes = episodes.filter((episode) => {
+          const sonarrEpisode = sonarrEpisodes.find(
+            (sEpisode) =>
+              sEpisode.seasonNumber === episode.ParentIndexNumber && sEpisode.episodeNumber === episode.IndexNumber
+          )
+          return !sonarrEpisode || !sonarrEpisode.hasFile
+        })
+        untrackedEpisodes.push(...untrackedSeriesEpisodes)
+      }
+
+      console.log(untrackedEpisodes.length + ' episodes not properly tracked by Sonarr')
+      await notificationService.notifyEpisodesNotInSonarr(untrackedEpisodes)
+      return untrackedEpisodes
     } catch (error) {
       throw error
     } finally {

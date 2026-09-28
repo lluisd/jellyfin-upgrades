@@ -59,4 +59,121 @@ describe('arrApi', () => {
       await expect(arrApi.getNamingConfig(config)).rejects.toThrow('Network error')
     })
   })
+
+  describe('getMovies', () => {
+    it('returns movies when API call is successful', async () => {
+      const mockResponse = [
+        { title: 'Movie 1', tmdbId: 1, imdbId: 'tt1', hasFile: true },
+        { title: 'Movie 2', tmdbId: 2, imdbId: 'tt2', hasFile: false }
+      ]
+      fetch.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockResponse)
+      })
+
+      const result = await arrApi.getMovies(config)
+
+      expect(result).toEqual(mockResponse)
+      expect(fetch).toHaveBeenCalledWith('http://mock-arr-url/api/v3/movie', {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'x-api-key': 'mock-api-key'
+        },
+        method: 'GET'
+      })
+    })
+
+    it('throws an error when API response is not ok', async () => {
+      fetch.mockResolvedValue({
+        ok: false,
+        status: 500
+      })
+
+      await expect(arrApi.getMovies(config)).rejects.toThrow('movie arr: 500')
+    })
+
+    it('throws an error when the API call fails', async () => {
+      fetch.mockRejectedValue(new Error('Network error'))
+
+      await expect(arrApi.getMovies(config)).rejects.toThrow('Network error')
+    })
+  })
+
+  describe('getSeries', () => {
+    it('returns series when API call is successful', async () => {
+      const mockResponse = [{ id: 1, title: 'Series 1', tvdbId: 100, tmdbId: 200, imdbId: 'tt1' }]
+      fetch.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockResponse)
+      })
+
+      const result = await arrApi.getSeries(config)
+
+      expect(result).toEqual(mockResponse)
+      expect(fetch).toHaveBeenCalledWith('http://mock-arr-url/api/v3/series', {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'x-api-key': 'mock-api-key'
+        },
+        method: 'GET'
+      })
+    })
+
+    it('throws an error when API response is not ok', async () => {
+      fetch.mockResolvedValue({
+        ok: false,
+        status: 500
+      })
+
+      await expect(arrApi.getSeries(config)).rejects.toThrow('series arr: 500')
+    })
+
+    it('throws an error when the API call fails', async () => {
+      fetch.mockRejectedValue(new Error('Network error'))
+
+      await expect(arrApi.getSeries(config)).rejects.toThrow('Network error')
+    })
+  })
+
+  describe('getEpisodes', () => {
+    it('returns episodes of a series when API call is successful', async () => {
+      const mockResponse = [
+        { seriesId: 1, seasonNumber: 1, episodeNumber: 1, hasFile: true },
+        { seriesId: 1, seasonNumber: 1, episodeNumber: 2, hasFile: false }
+      ]
+      fetch.mockResolvedValue({
+        ok: true,
+        json: jest.fn().mockResolvedValue(mockResponse)
+      })
+
+      const result = await arrApi.getEpisodes(config, 1)
+
+      expect(result).toEqual(mockResponse)
+      expect(fetch).toHaveBeenCalledWith('http://mock-arr-url/api/v3/episode?seriesId=1', {
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'x-api-key': 'mock-api-key'
+        },
+        method: 'GET'
+      })
+    })
+
+    it('throws an error when API response is not ok', async () => {
+      fetch.mockResolvedValue({
+        ok: false,
+        status: 500
+      })
+
+      await expect(arrApi.getEpisodes(config, 1)).rejects.toThrow('episode arr: 500')
+    })
+
+    it('throws an error when the API call fails', async () => {
+      fetch.mockRejectedValue(new Error('Network error'))
+
+      await expect(arrApi.getEpisodes(config, 1)).rejects.toThrow('Network error')
+    })
+  })
 })

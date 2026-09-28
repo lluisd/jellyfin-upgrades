@@ -15,6 +15,8 @@ It maintains a local database (sqlite or mongodb) with all the movies (not tv sh
 - **Purges Movies/Episodes without a hardlink**: If some movies are not in the Jellyfin library, they will be removed from torrent client.
 - **Notifies on torrent errors**: If a torrent has some error, it will notify you via Telegram.
 - **AVC Movies with 10 bits**: If a movie/episode is AVC with 10 bits, it will be notified via Telegram.
+- **Notifies movies not tracked by Radarr**: Checks all Jellyfin movies against Radarr's movie list and notifies via Telegram any movie that Radarr doesn't know about, or that Radarr tracks but reports as missing its file (`hasFile: false`). Requires `RADARR_URL` and `RADARR_API_KEY` to be set (endpoint: `/moviesNotInRadarr`).
+- **Notifies episodes not tracked by Sonarr**: Checks all Jellyfin episodes against Sonarr (series matched by TVDB id, falling back to IMDB id; episodes by season and episode number) and notifies via Telegram, grouped by series, any episode that Sonarr doesn't know about, or that Sonarr tracks but reports as missing its file (`hasFile: false`). Requires `SONARR_URL` and `SONARR_API_KEY` to be set (endpoint: `/episodesNotInSonarr`).
 
 ## Usage on docker
 To run this project, you can use Docker. The application is designed to run in a Docker container, which simplifies deployment and management.
@@ -27,6 +29,7 @@ To run this project, you can use Docker. The application is designed to run in a
 - qBittorrent configured and running.
 - Telegram bot set up for notifications.
 - Radarr server running and accessible (optional, for movie management).
+- Sonarr server running and accessible (optional, for series management).
 
 ## Environment variables
 
@@ -100,6 +103,16 @@ Configure Radarr url and API key if you want to apply the same renaming rules as
 | `RADARR_API_KEY`     | No       | —                       | API key for Radarr.                                                |
 
 
+###  Sonarr Configuration (optional):
+
+Configure Sonarr url and API key to check which Jellyfin episodes are not tracked by Sonarr.
+
+| Variable Name        | Required | Default Value           | Description                                                        |
+|----------------------|----------|-------------------------|--------------------------------------------------------------------|
+| `SONARR_URL`         | No       | —                       | URL of the Sonarr server.                                          |
+| `SONARR_API_KEY`     | No       | —                       | API key for Sonarr.                                                |
+
+
 ## Docker compose
 To run the project using Docker Compose, use the following command:
 
@@ -129,6 +142,8 @@ services:
       - TORRENT_CLIENT_NOTIFY_ONLY=true      
       - RADARR_URL=http://radarr:7878
       - RADARR_API_KEY=ccaa83838abcd822aaaccccc831
+      - SONARR_URL=http://sonarr:8989
+      - SONARR_API_KEY=ddbb83838abcd822aaaccccc832
     volumes:
       - /volume2/media1:/data1
       - /volume3/media2:/data2
