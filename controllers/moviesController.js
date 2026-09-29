@@ -4,7 +4,7 @@ import mediaService from '../services/mediaService.js'
 import dataService from '../services/dataService.js'
 import notificationService from '../services/notificationService.js'
 import radarrService from '../services/radarrService.js'
-import { getFilenameAndExtension } from '../utils/files.js'
+import { getFilenameAndExtension, stripArrIdTags } from '../utils/files.js'
 import semaphore from '../semaphore.js'
 import { config } from '../config.js'
 
@@ -54,7 +54,8 @@ class MoviesController {
 
         const newSize = mediaMovie?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
         await dataService.updateMoviePathAndSize(tmdb, imdb, tvdb, mediaMovie.Path, newSize)
-        const { name, extension } = getFilenameAndExtension(dataMovie.path)
+        const { name: libraryName, extension } = getFilenameAndExtension(dataMovie.path)
+        const name = stripArrIdTags(libraryName)
 
         if (config.radarr.url) await radarrService.loadNamingConfig()
         let deleted = false
@@ -169,8 +170,14 @@ class MoviesController {
 
       const dataMovie = await dataService.getMovieByJellyfinId(id)
 
-      const { name, extension } = getFilenameAndExtension(dataMovie.path)
-      let { deleted, reason, torrentExists, tracker } = await torrentService.deleteFromTorrentClient(name, extension)
+      const { name: libraryName, extension } = getFilenameAndExtension(dataMovie.path)
+      const name = stripArrIdTags(libraryName)
+      if (config.radarr.url) await radarrService.loadNamingConfig()
+      let { deleted, reason, torrentExists, tracker } = await torrentService.deleteFromTorrentClient(
+        name,
+        extension,
+        config.radarr.url ? radarrService.applyRenaming.bind(radarrService) : null
+      )
       if (!torrentExists) {
         deleted = await storageService.removeFileOrFolder(name, extension, config.torrentClient.moviesFolder)
       }

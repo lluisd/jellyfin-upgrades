@@ -51,3 +51,7 @@ export async function exists(filePath) {
     return false
   }
 }
+
+export function stripArrIdTags(name) {
+  return name.replace(/\s*[\[{](tmdbid|tmdb|imdbid|imdb|tvdbid|tvdb)-[^\]}]+[\]}]/gi, '')
+}
