@@ -38,49 +38,8 @@ class TorrentService {
 
   async canDeleteFromTorrentClient(name, extension = '', applyRenamingFn = null) {
     try {
-      let canDelete = true
-      let reason = TorrentStatus.DEFAULT
       const torrent = await this.clienApi.getTorrent(name, extension, applyRenamingFn)
-      if (torrent) {
-        const minSeconds = this._getMinSeedTime(torrent.tracker)
-        if (!torrent.isCompleted) {
-          canDelete = false
-          reason = TorrentStatus.DOWNLOAD_NOT_COMPLETED
-        }
-        if (!torrent.isSeeding) {
-          canDelete = false
-          reason = TorrentStatus.NO_SEEDING
-        }
-
-        if (torrent.secondsSeeding < minSeconds) {
-          if (torrent.canRestSeedingOnRestart) {
-            if (
-              torrent.dateCompleted === 0 ||
-              !moment.unix(torrent.dateCompleted).isBefore(moment().subtract(minSeconds, 'seconds'))
-            ) {
-              if (
-                torrent.startDate === 0 ||
-                !moment.unix(torrent.startDate).isBefore(moment().subtract(minSeconds, 'seconds'))
-              ) {
-                reason = TorrentStatus.INCOMPLETE_SEED_TIME
-                canDelete = false
-              }
-            }
-          } else {
-            reason = TorrentStatus.INCOMPLETE_SEED_TIME
-            canDelete = false
-          }
-        }
-      } else {
-        reason = TorrentStatus.NO_EXISTS
-      }
-      return {
-        canDelete,
-        reason,
-        tracker: torrent?.tracker ?? '',
-        torrentExists: torrent !== undefined,
-        torrent: torrent
-      }
+      return this._evaluateTorrent(torrent)
     } catch (error) {
       throw new Error(`Error on checking can delete torrent ${name}${extension}: ${error}`)
     }
@@ -89,19 +48,85 @@ class TorrentService {
   async deleteFromTorrentClient(name, extension = '', applyRenamingFn = null) {
     try {
       const response = await this.canDeleteFromTorrentClient(name, extension, applyRenamingFn)
-
-      if (response.torrent && response.canDelete) {
-        response.reason = TorrentStatus.DELETED
-        await this.clienApi.deleteTorrent(response.torrent.id)
-      }
-      return {
-        tracker: response.tracker,
-        torrentExists: response.torrentExists,
-        deleted: response.torrent && response.canDelete,
-        reason: response.reason
-      }
+      return await this._deleteIfAllowed(response)
     } catch (error) {
       throw new Error(`Error deleting torrent ${name}${extension}: ${error}`)
+    }
+  }
+
+  async canDeleteTorrentByHash(hash) {
+    try {
+      const torrent = hash ? await this.clienApi.getTorrentByHash(hash) : undefined
+      return this._evaluateTorrent(torrent)
+    } catch (error) {
+      throw new Error(`Error on checking can delete torrent ${hash}: ${error}`)
+    }
+  }
+
+  async deleteTorrentByHash(hash) {
+    try {
+      const response = await this.canDeleteTorrentByHash(hash)
+      return await this._deleteIfAllowed(response)
+    } catch (error) {
+      throw new Error(`Error deleting torrent ${hash}: ${error}`)
+    }
+  }
+
+  _evaluateTorrent(torrent) {
+    let canDelete = true
+    let reason = TorrentStatus.DEFAULT
+    if (torrent) {
+      const minSeconds = this._getMinSeedTime(torrent.tracker)
+      if (!torrent.isCompleted) {
+        canDelete = false
+        reason = TorrentStatus.DOWNLOAD_NOT_COMPLETED
+      }
+      if (!torrent.isSeeding) {
+        canDelete = false
+        reason = TorrentStatus.NO_SEEDING
+      }
+
+      if (torrent.secondsSeeding < minSeconds) {
+        if (torrent.canRestSeedingOnRestart) {
+          if (
+            torrent.dateCompleted === 0 ||
+            !moment.unix(torrent.dateCompleted).isBefore(moment().subtract(minSeconds, 'seconds'))
+          ) {
+            if (
+              torrent.startDate === 0 ||
+              !moment.unix(torrent.startDate).isBefore(moment().subtract(minSeconds, 'seconds'))
+            ) {
+              reason = TorrentStatus.INCOMPLETE_SEED_TIME
+              canDelete = false
+            }
+          }
+        } else {
+          reason = TorrentStatus.INCOMPLETE_SEED_TIME
+          canDelete = false
+        }
+      }
+    } else {
+      reason = TorrentStatus.NO_EXISTS
+    }
+    return {
+      canDelete,
+      reason,
+      tracker: torrent?.tracker ?? '',
+      torrentExists: torrent !== undefined,
+      torrent: torrent
+    }
+  }
+
+  async _deleteIfAllowed(response) {
+    if (response.torrent && response.canDelete) {
+      response.reason = TorrentStatus.DELETED
+      await this.clienApi.deleteTorrent(response.torrent.id)
+    }
+    return {
+      tracker: response.tracker,
+      torrentExists: response.torrentExists,
+      deleted: response.torrent && response.canDelete,
+      reason: response.reason
     }
   }
 

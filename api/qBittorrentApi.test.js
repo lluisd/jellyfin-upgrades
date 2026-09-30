@@ -251,4 +251,26 @@ describe('QBittorrentApi', () => {
       await expect(qbApi.deleteTorrent('mock-id')).rejects.toThrow()
     })
   })
+
+  describe('getTorrentByHash', () => {
+    it('returns the torrent matching the hash case-insensitively', async () => {
+      listTorrentsMock.mockResolvedValue([{ hash: 'abcdef', name: 'Release.Name', state: 'stalledUP', progress: 1 }])
+
+      const result = await qbApi.getTorrentByHash('ABCDEF')
+
+      expect(listTorrentsMock).toHaveBeenCalledWith({ hashes: 'abcdef', includeTrackers: true })
+      expect(result).toMatchObject({ id: 'abcdef', name: 'Release.Name', isSeeding: true, isCompleted: true })
+    })
+
+    it('returns undefined when no torrent matches', async () => {
+      listTorrentsMock.mockResolvedValue([])
+
+      expect(await qbApi.getTorrentByHash('abcdef')).toBeUndefined()
+    })
+
+    it('returns undefined without calling the API when no hash is given', async () => {
+      expect(await qbApi.getTorrentByHash(null)).toBeUndefined()
+      expect(listTorrentsMock).not.toHaveBeenCalled()
+    })
+  })
 })

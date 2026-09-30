@@ -54,36 +54,12 @@ class MoviesController {
 
         const newSize = mediaMovie?.MediaSources?.reduce((acc, source) => acc + source?.Size || 0, 0) ?? 0
         await dataService.updateMoviePathAndSize(tmdb, imdb, tvdb, mediaMovie.Path, newSize)
-        const { name: libraryName, extension } = getFilenameAndExtension(dataMovie.path)
-        const name = stripArrIdTags(libraryName)
+        const hash = await this._getPreviousDownloadHash(tmdb, imdb)
+        console.log(`${id}: previous torrent hash from Radarr: ${hash ?? 'not found'}`)
 
-        if (config.radarr.url) await radarrService.loadNamingConfig()
-        let deleted = false
-        let reason = TorrentStatus.DEFAULT
-        let torrentExists
-        let tracker
-        if (notifyOnly) {
-          const canDeleteResponse = await torrentService.canDeleteFromTorrentClient(
-            name,
-            extension,
-            config.radarr.url ? radarrService.applyRenaming.bind(radarrService) : null
-          )
-          torrentExists = canDeleteResponse.torrentExists
-          tracker = canDeleteResponse.tracker
-        } else {
-          const deleteResponse = await torrentService.deleteFromTorrentClient(
-            name,
-            extension,
-            config.radarr.url ? radarrService.applyRenaming.bind(radarrService) : null
-          )
-          deleted = deleteResponse.deleted
-          reason = deleteResponse.reason
-          torrentExists = deleteResponse.torrentExists
-          tracker = deleteResponse.tracker
-          if (!torrentExists) {
-            deleted = await storageService.removeFileOrFolder(name, extension, config.torrentClient.moviesFolder)
-          }
-        }
+        const { deleted, reason, torrentExists, tracker } = notifyOnly
+          ? { ...(await torrentService.canDeleteTorrentByHash(hash)), deleted: false, reason: TorrentStatus.DEFAULT }
+          : await torrentService.deleteTorrentByHash(hash)
 
         await notificationService.notifyUpgradedMovie(
           mediaMovie,
@@ -192,6 +168,16 @@ class MoviesController {
       throw error
     } finally {
       release()
+    }
+  }
+
+  async _getPreviousDownloadHash(tmdb, imdb) {
+    if (!config.radarr.url) return null
+    try {
+      return await radarrService.getPreviousDownloadHash(tmdb, imdb)
+    } catch (error) {
+      console.log(`Error getting previous torrent hash from Radarr: ${error}`)
+      return null
     }
   }
 }
