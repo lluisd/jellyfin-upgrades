@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals'
 import moment from 'moment'
 const getTorrentMock = jest.fn()
+const getTorrentByHashMock = jest.fn()
 const getTorrentsWithErrorsMock = jest.fn()
 const deleteTorrentMock = jest.fn()
 
@@ -14,6 +15,7 @@ jest.unstable_mockModule('../config.js', () => ({
 jest.unstable_mockModule('../api/qBittorrentApi.js', () => ({
   QBittorrentApi: jest.fn().mockImplementation(() => ({
     getTorrent: getTorrentMock,
+    getTorrentByHash: getTorrentByHashMock,
     getTorrentsWithErrors: getTorrentsWithErrorsMock,
     deleteTorrent: deleteTorrentMock
   }))
@@ -197,6 +199,48 @@ describe('TorrentService', () => {
       getTorrentMock.mockRejectedValue(new Error('API error'))
 
       await expect(torrentService.deleteFromTorrentClient('movie', '.mkv')).rejects.toThrow()
+    })
+  })
+
+  describe('hash based deletion', () => {
+    const torrent = { id: 'abc', isCompleted: true, isSeeding: true, secondsSeeding: 604800, tracker: 'example' }
+
+    it('deletes the torrent found by hash', async () => {
+      getTorrentByHashMock.mockResolvedValue(torrent)
+
+      const result = await torrentService.deleteTorrentByHash('abc')
+
+      expect(getTorrentByHashMock).toHaveBeenCalledWith('abc')
+      expect(getTorrentMock).not.toHaveBeenCalled()
+      expect(deleteTorrentMock).toHaveBeenCalledWith('abc')
+      expect(result).toEqual({ tracker: 'example', torrentExists: true, deleted: true, reason: TorrentStatus.DELETED })
+    })
+
+    it('does not delete when seeding conditions are not met', async () => {
+      getTorrentByHashMock.mockResolvedValue({ ...torrent, secondsSeeding: 100, canRestSeedingOnRestart: false })
+
+      const result = await torrentService.deleteTorrentByHash('abc')
+
+      expect(result.deleted).toBe(false)
+      expect(result.reason).toBe(TorrentStatus.INCOMPLETE_SEED_TIME)
+      expect(deleteTorrentMock).not.toHaveBeenCalled()
+    })
+
+    it('returns no exists without calling the client when there is no hash', async () => {
+      const result = await torrentService.canDeleteTorrentByHash(null)
+
+      expect(getTorrentByHashMock).not.toHaveBeenCalled()
+      expect(result.torrentExists).toBe(false)
+      expect(result.reason).toBe(TorrentStatus.NO_EXISTS)
+    })
+
+    it('returns no exists when the hash is not in the client', async () => {
+      getTorrentByHashMock.mockResolvedValue(undefined)
+
+      const result = await torrentService.deleteTorrentByHash('abc')
+
+      expect(result.torrentExists).toBe(false)
+      expect(deleteTorrentMock).not.toHaveBeenCalled()
     })
   })
 })

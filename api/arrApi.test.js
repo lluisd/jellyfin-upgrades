@@ -176,4 +176,47 @@ describe('arrApi', () => {
       await expect(arrApi.getEpisodes(config, 1)).rejects.toThrow('Network error')
     })
   })
+
+  describe('getMovieByTmdb', () => {
+    it('returns the first movie matching the tmdb id', async () => {
+      fetch.mockResolvedValue({ ok: true, json: jest.fn().mockResolvedValue([{ id: 7, tmdbId: 123 }]) })
+
+      const result = await arrApi.getMovieByTmdb(config, '123')
+
+      expect(result).toEqual({ id: 7, tmdbId: 123 })
+      expect(fetch).toHaveBeenCalledWith('http://mock-arr-url/api/v3/movie?tmdbId=123', expect.any(Object))
+    })
+
+    it('returns null when not found', async () => {
+      fetch.mockResolvedValue({ ok: true, json: jest.fn().mockResolvedValue([]) })
+
+      expect(await arrApi.getMovieByTmdb(config, '123')).toBeNull()
+    })
+
+    it('throws an error when API response is not ok', async () => {
+      fetch.mockResolvedValue({ ok: false, status: 500 })
+
+      await expect(arrApi.getMovieByTmdb(config, '123')).rejects.toThrow('movie by tmdb arr: 500')
+    })
+  })
+
+  describe('getMovieImportHistory', () => {
+    it('requests import events for the movie', async () => {
+      fetch.mockResolvedValue({ ok: true, json: jest.fn().mockResolvedValue([{ downloadId: 'ABC' }]) })
+
+      const result = await arrApi.getMovieImportHistory(config, 7)
+
+      expect(result).toEqual([{ downloadId: 'ABC' }])
+      expect(fetch).toHaveBeenCalledWith(
+        'http://mock-arr-url/api/v3/history/movie?movieId=7&eventType=downloadFolderImported',
+        expect.any(Object)
+      )
+    })
+
+    it('throws an error when API response is not ok', async () => {
+      fetch.mockResolvedValue({ ok: false, status: 500 })
+
+      await expect(arrApi.getMovieImportHistory(config, 7)).rejects.toThrow('movie history arr: 500')
+    })
+  })
 })

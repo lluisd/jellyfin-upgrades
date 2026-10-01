@@ -93,6 +93,37 @@ async function getEpisodes(config, seriesId) {
   }
 }
 
+async function getMovieByTmdb(config, tmdbId) {
+  console.log(`Calling /api/v3/movie?tmdbId=${tmdbId}`)
+  const endpoint = `${config.url}/api/v3/movie?tmdbId=${encodeURIComponent(tmdbId)}`
+  const options = {
+    headers: _getHeaders(config),
+    method: 'GET'
+  }
+
+  const response = await fetch(endpoint, options)
+  if (!response.ok) {
+    throw new Error(`movie by tmdb arr: ${response.status}`)
+  }
+  const movies = await response.json()
+  return movies?.[0] ?? null
+}
+
+async function getMovieImportHistory(config, movieId) {
+  console.log(`Calling /api/v3/history/movie?movieId=${movieId}&eventType=downloadFolderImported`)
+  const endpoint = `${config.url}/api/v3/history/movie?movieId=${encodeURIComponent(movieId)}&eventType=downloadFolderImported`
+  const options = {
+    headers: _getHeaders(config),
+    method: 'GET'
+  }
+
+  const response = await fetch(endpoint, options)
+  if (!response.ok) {
+    throw new Error(`movie history arr: ${response.status}`)
+  }
+  return await response.json()
+}
+
 function _getHeaders(config) {
   return {
     Accept: 'application/json',
@@ -106,5 +137,7 @@ export default {
   getQueue,
   getMovies,
   getSeries,
-  getEpisodes
+  getEpisodes,
+  getMovieByTmdb,
+  getMovieImportHistory
 }

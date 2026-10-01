@@ -27,22 +27,41 @@ export class QBittorrentApi {
       })
 
       if (torrent) {
-        return {
-          id: torrent.hash,
-          name: torrent.name,
-          secondsSeeding: torrent.seeding_time,
-          tracker: this._getSiteName(torrent.tracker),
-          //dateCompleted: torrent.completion_on,
-          isSeeding:
-            torrent.state === TorrentState.ForcedUP ||
-            torrent.state === TorrentState.Uploading ||
-            torrent.state === TorrentState.StalledUP,
-          isCompleted: torrent.progress === 1,
-          canRestSeedingOnRestart: true
-        }
+        return this._toTorrent(torrent)
       }
     } catch (error) {
       throw new Error(`Error getting torrent ${name}${extension}: ${error}`)
+    }
+  }
+
+  async getTorrentByHash(hash) {
+    try {
+      if (!hash) return undefined
+      const normalizedHash = hash.toLowerCase()
+      const apiResponse = await this.client.listTorrents({
+        hashes: normalizedHash,
+        includeTrackers: true
+      })
+      const torrent = apiResponse.find((torrent) => torrent.hash?.toLowerCase() === normalizedHash)
+      return torrent ? this._toTorrent(torrent) : undefined
+    } catch (error) {
+      throw new Error(`Error getting torrent by hash ${hash}: ${error}`)
+    }
+  }
+
+  _toTorrent(torrent) {
+    return {
+      id: torrent.hash,
+      name: torrent.name,
+      secondsSeeding: torrent.seeding_time,
+      tracker: this._getSiteName(torrent.tracker),
+      //dateCompleted: torrent.completion_on,
+      isSeeding:
+        torrent.state === TorrentState.ForcedUP ||
+        torrent.state === TorrentState.Uploading ||
+        torrent.state === TorrentState.StalledUP,
+      isCompleted: torrent.progress === 1,
+      canRestSeedingOnRestart: true
     }
   }
 

@@ -95,7 +95,11 @@ Configure the trackers minimum seeding days to prevent the deletion of torrents 
 
 ###  Radarr Configuration (optional):
 
-Configure Radarr url and API key if you want to apply the same renaming rules as Radarr does. This is useful on deleting the previous movie torrent on upgrade.
+Configure the Radarr URL and API key to remove the previous movie torrent on upgrade, with **any Radarr naming scheme**. When a movie is upgraded, the app reads that movie's import history in Radarr. The history contains the torrent hash (`downloadId`) of the file being replaced, and the torrent is removed from qBittorrent by that hash, so names are never compared.
+
+If no hash is found (Radarr not configured, manual import, history cleared) the torrent is left untouched. The scheduled purge (`/purgeMovies`) removes it later, once its files have no hardlinks.
+
+On movie deletion, the app still matches torrents by name and applies Radarr's renaming rules.
 
 | Variable Name        | Required | Default Value           | Description                                                        |
 |----------------------|----------|-------------------------|--------------------------------------------------------------------|
