@@ -36,18 +36,18 @@ class TorrentService {
     }
   }
 
-  async canDeleteFromTorrentClient(name, extension = '', applyRenamingFn = null) {
+  async canDeleteFromTorrentClient(name, extension = '') {
     try {
-      const torrent = await this.clienApi.getTorrent(name, extension, applyRenamingFn)
+      const torrent = await this.clienApi.getTorrent(name, extension)
       return this._evaluateTorrent(torrent)
     } catch (error) {
       throw new Error(`Error on checking can delete torrent ${name}${extension}: ${error}`)
     }
   }
 
-  async deleteFromTorrentClient(name, extension = '', applyRenamingFn = null) {
+  async deleteFromTorrentClient(name, extension = '') {
     try {
-      const response = await this.canDeleteFromTorrentClient(name, extension, applyRenamingFn)
+      const response = await this.canDeleteFromTorrentClient(name, extension)
       return await this._deleteIfAllowed(response)
     } catch (error) {
       throw new Error(`Error deleting torrent ${name}${extension}: ${error}`)

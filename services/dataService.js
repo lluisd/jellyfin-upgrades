@@ -99,14 +99,6 @@ class DataService {
     }
   }
 
-  async deleteMovie(jellyfinId) {
-    try {
-      return await this.dbApi.deleteMovie(jellyfinId)
-    } catch (error) {
-      throw error
-    }
-  }
-
   async updateMoviePathAndSize(tmdb, imdb, tvdb, path, size) {
     try {
       return await this.dbApi.updateMovie(tmdb, imdb, tvdb, { path: path, size: size })

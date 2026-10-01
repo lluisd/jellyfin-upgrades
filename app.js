@@ -211,21 +211,6 @@ app.post('/addedEpisode', async function (req, res, next) {
   }
 })
 
-app.post('/deletedMovie', async function (req, res, next) {
-  try {
-    const data = req.body
-    console.log('Received deleted item webhook:', data)
-    const result = await moviesController.deleteMovie(data.id, data.tmdb, data.imdb, data.tvdb, data.name)
-    const response = {
-      message: result,
-      status: 'success'
-    }
-    res.json(response)
-  } catch (error) {
-    next(error)
-  }
-})
-
 const listener = app.listen(process.env.PORT, async () => {
   console.log('Listening on port ', +listener.address().port)
   console.log('Database type: ', config.database.type)

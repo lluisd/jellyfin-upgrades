@@ -103,18 +103,6 @@ describe('QBittorrentApi', () => {
       expect(result).toBeUndefined()
     })
 
-    it('When applyRenamingFn is passed, appies to all torrents to be compared on', async () => {
-      listTorrentsMock.mockResolvedValue([
-        {
-          name: 'extra-mock-torrent.mp4'
-        }
-      ])
-
-      const applyRenamingFn = (name) => name.replace(/^extra-/, '')
-      const result = await qbApi.getTorrent('mock-torrent', '.mp4', applyRenamingFn)
-      expect(result).toBeDefined()
-    })
-
     it('throws an error when the API call fails', async () => {
       listTorrentsMock.mockRejectedValue(new Error('Mocked error'))
 

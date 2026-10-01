@@ -124,29 +124,6 @@ class NotificationService {
     }
   }
 
-  async notifyDeletedMovie(dataMovie, deleted, reason, torrentExists, tracker) {
-    try {
-      const message =
-        '*Movie deleted*: ' +
-        dataMovie.name +
-        ' (_' +
-        dataMovie.tmdb +
-        '_) \n' +
-        '*Archivo*: ' +
-        (deleted ? '✔️ eliminado' : '❌ no eliminado') +
-        '\n' +
-        '*Torrent*: ' +
-        (deleted && torrentExists ? '✔️ eliminado' : '❌ no eliminado: ' + reason) +
-        ' ' +
-        tracker +
-        '\n'
-      console.log(message)
-      await TelegramApi.notify(message)
-    } catch (error) {
-      throw error
-    }
-  }
-
   async notifyTorrentsWithoutHardlinks(intents, isMovie, notifyOnly) {
     try {
       let elements = intents.sort((a, b) => b.deleted - a.deleted)

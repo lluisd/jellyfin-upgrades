@@ -3,19 +3,6 @@ import path from 'path'
 import { exists } from '../utils/files.js'
 
 class StorageService {
-  async removeFileOrFolder(name, extension, rootFolder) {
-    try {
-      let isDeleted
-      isDeleted = await this.removeFile(`${name}${extension}`, rootFolder)
-      if (!isDeleted) {
-        isDeleted = await this.removeFolder(name, rootFolder)
-      }
-      return isDeleted
-    } catch (error) {
-      throw new Error(`Error removing file or folder: ${error}`)
-    }
-  }
-
   async removeFolder(folderName, rootFolder) {
     try {
       let isDeleted = false

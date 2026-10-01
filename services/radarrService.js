@@ -1,8 +1,8 @@
-import ArrNamingService from '../services/arrNamingService.js'
+import ArrService from './arrService.js'
 import arrApi from '../api/arrApi.js'
 import { config } from '../config.js'
 
-class RadarrService extends ArrNamingService {
+class RadarrService extends ArrService {
   constructor() {
     super(config.radarr)
   }

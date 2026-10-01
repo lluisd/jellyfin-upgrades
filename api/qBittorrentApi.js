@@ -12,19 +12,13 @@ export class QBittorrentApi {
     })
   }
 
-  async getTorrent(name, extension, applyRenamingFn = null) {
+  async getTorrent(name, extension) {
     try {
       const apiResponse = await this.client.listTorrents({
         includeTrackers: true
       })
 
-      const torrent = apiResponse.find((torrent) => {
-        let torrentName = torrent.name
-        if (applyRenamingFn) {
-          torrentName = applyRenamingFn(torrent.name)
-        }
-        return torrentName === `${name}${extension}` || torrentName === name
-      })
+      const torrent = apiResponse.find((torrent) => torrent.name === `${name}${extension}` || torrent.name === name)
 
       if (torrent) {
         return this._toTorrent(torrent)

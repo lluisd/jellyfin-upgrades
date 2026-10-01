@@ -1,10 +1,8 @@
-import storageService from '../services/storageService.js'
 import torrentService, { TorrentStatus } from '../services/torrentService.js'
 import mediaService from '../services/mediaService.js'
 import dataService from '../services/dataService.js'
 import notificationService from '../services/notificationService.js'
 import radarrService from '../services/radarrService.js'
-import { getFilenameAndExtension, stripArrIdTags } from '../utils/files.js'
 import semaphore from '../semaphore.js'
 import { config } from '../config.js'
 
@@ -131,39 +129,6 @@ class MoviesController {
       console.log(untrackedMovies.length + ' movies not properly tracked by Radarr')
       await notificationService.notifyMoviesNotInRadarr(untrackedMovies)
       return untrackedMovies
-    } catch (error) {
-      throw error
-    } finally {
-      release()
-    }
-  }
-
-  async deleteMovie(id, tmdb, imdb, jellyfinName) {
-    const [value, release] = await semaphore.acquire()
-    try {
-      let response = 'nothing'
-      console.log(`deleting movie: ${id} ${jellyfinName} (tmdb: ${tmdb}, imdb: ${imdb})`)
-
-      const dataMovie = await dataService.getMovieByJellyfinId(id)
-
-      const { name: libraryName, extension } = getFilenameAndExtension(dataMovie.path)
-      const name = stripArrIdTags(libraryName)
-      if (config.radarr.url) await radarrService.loadNamingConfig()
-      let { deleted, reason, torrentExists, tracker } = await torrentService.deleteFromTorrentClient(
-        name,
-        extension,
-        config.radarr.url ? radarrService.applyRenaming.bind(radarrService) : null
-      )
-      if (!torrentExists) {
-        deleted = await storageService.removeFileOrFolder(name, extension, config.torrentClient.moviesFolder)
-      }
-
-      await dataService.deleteMovie(id)
-      await notificationService.notifyDeletedMovie(dataMovie, deleted, reason, torrentExists, tracker)
-
-      response = `Movie deleted: ${dataMovie.name} (id: ${id}, tmdb: ${tmdb}, imdb: ${imdb})`
-      console.log(response)
-      return response
     } catch (error) {
       throw error
     } finally {

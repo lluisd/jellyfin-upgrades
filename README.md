@@ -99,8 +99,6 @@ Configure the Radarr URL and API key to remove the previous movie torrent on upg
 
 If no hash is found (Radarr not configured, manual import, history cleared) the torrent is left untouched. The scheduled purge (`/purgeMovies`) removes it later, once its files have no hardlinks.
 
-On movie deletion, the app still matches torrents by name and applies Radarr's renaming rules.
-
 | Variable Name        | Required | Default Value           | Description                                                        |
 |----------------------|----------|-------------------------|--------------------------------------------------------------------|
 | `RADARR_URL`         | No       | —                       | URL of the Radarr server.                                          |

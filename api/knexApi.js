@@ -262,12 +262,4 @@ export class KnexApi {
       throw new Error(`Error clearing orphans: ${error.message}`)
     }
   }
-
-  async deleteMovie(jellyfinId) {
-    try {
-      return await this.db('movies').where('jellyfinId', jellyfinId).del()
-    } catch (error) {
-      throw new Error(`Error deleting movie: ${error.message}`)
-    }
-  }
 }
